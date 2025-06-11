@@ -20,7 +20,7 @@
           </button>
         </div>
         <a href="#" class="nav-item">首页</a>
-        <a href="#" class="nav-item">注册</a>
+        <router-link to="/register" class="nav-item">注册</router-link>
         <a href="#" class="nav-item">登录</a>
       </nav>
     </div>

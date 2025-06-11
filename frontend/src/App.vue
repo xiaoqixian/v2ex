@@ -1,6 +1,7 @@
 <template>
   <div class="app-container" :class="currentTheme">
     <Header />
+    <router-view></router-view>
     <div class="container">
       <div class="main-content">
         <div class="left-content">
