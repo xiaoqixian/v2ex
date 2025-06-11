@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "v2ex/backend/rpc_gen/user;userpb";
+
+// 用户注册请求
+message RegisterRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+// 注册响应
+message RegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 用户服务
+service UserService {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+}
