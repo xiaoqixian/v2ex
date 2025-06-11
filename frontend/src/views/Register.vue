@@ -35,7 +35,7 @@ async function handleRegister() {
     console.log(res.data)
   } catch (err) {
     console.error(err)
-    alert('注册失败')
+    alert(err.response.data.error)
   }
 }
 </script>

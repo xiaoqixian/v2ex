@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "v2ex/backend/rpc_gen/user;userpb";
+option go_package = "rpc_gen/user;userpb";
 
 // 用户注册请求
 message RegisterRequest {
