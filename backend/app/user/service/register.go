@@ -29,7 +29,7 @@ func NewRegisterService() (*RegisterServiceImpl, error) {
 	if !c.MySQL.ParseTime {
 		parseTime = "False"
 	}
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%s&loc=%s", 
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%s&loc=%s", 
 		c.MySQL.User,
 		c.MySQL.Password,
 		c.MySQL.Host,
@@ -44,6 +44,7 @@ func NewRegisterService() (*RegisterServiceImpl, error) {
 	if err != nil {
 		panic(err)
 	}
+	db.AutoMigrate(&model.User{})
 	return &RegisterServiceImpl {
 		db: db,
 	}, nil
@@ -53,22 +54,22 @@ func (impl *RegisterServiceImpl) Register(
   ctx context.Context,
   in *userpb.RegisterRequest,
 ) (*userpb.RegisterResponse, error) {
-	user, err := model.GetByUsername(impl.db, ctx, in.Username)
+	userExists, err := model.UsernameExists(impl.db, ctx, in.Username)
 	if err != nil {
 		return nil, err
 	}
-	if user != nil {
+	if userExists {
 		return &userpb.RegisterResponse{
 			Success: false,
 			Message: "用户名已存在",
 		}, nil
 	}
 
-	user, err = model.GetByEmail(impl.db, ctx, in.Email)
+	emailExists, err := model.EmailExists(impl.db, ctx, in.Email)
 	if err != nil {
 		return nil, err
 	}
-	if user != nil {
+	if emailExists {
 		return &userpb.RegisterResponse{
 			Success: false,
 			Message: "邮箱已注册",
@@ -80,7 +81,7 @@ func (impl *RegisterServiceImpl) Register(
 		return nil, err
 	}
 
-	user = &model.User {
+	user := &model.User {
 		Email: in.Email,
 		PasswordHashed: string(hashedPassword),
 		Username: in.Username,

@@ -28,23 +28,23 @@ type Config struct {
 }
 
 var(
-	conf *Config
+	conf Config
 	once sync.Once
 )
 
-func init() {
-	f, err := os.ReadFile("conf.yaml")
+func Init() {
+	f, err := os.ReadFile("conf/conf.yaml")
 	if err != nil {
 		panic(err)
 	}
 
-	err = yaml.Unmarshal(f, conf)
+	err = yaml.Unmarshal(f, &conf)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func GetConf() *Config {
-	once.Do(init)
-	return conf
+	once.Do(Init)
+	return &conf
 }

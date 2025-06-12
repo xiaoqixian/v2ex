@@ -6,6 +6,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,12 +23,13 @@ type RegisterArgs struct {
 }
 
 func RegisterUser(gin_ctx *gin.Context) {
+	log.Println("New RegisterUser request")
 
 	var args RegisterArgs
 	err := gin_ctx.ShouldBindJSON(&args)
 	if err != nil {
 		gin_ctx.JSON(http.StatusBadRequest, gin.H {
-			"error": "服务暂不可用，请稍后再试",
+			"error": "JSON 请求解析错误",
 		})
 		return
 	}
@@ -34,7 +37,7 @@ func RegisterUser(gin_ctx *gin.Context) {
 	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
 	if err != nil {
 		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": "服务暂不可用，请稍后再试",
+			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),
 		})
 		return
 	}
@@ -53,7 +56,7 @@ func RegisterUser(gin_ctx *gin.Context) {
 	resp, err := client.Register(ctx, &req)
 	if err != nil {
 		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": "服务暂不可用，请稍后再试",
+			"error": fmt.Sprintf("RPC 请求超时: %s", err.Error()),
 		})
 		return
 	}

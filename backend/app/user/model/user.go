@@ -18,14 +18,20 @@ type User struct {
 	Avator         string `json:"avator"`
 }
 
-func GetByEmail(db *gorm.DB, ctx context.Context, email string) (user *User, err error) {
-	err = db.WithContext(ctx).Model(&User{}).Where(&User{Email: email}).First(&user).Error
-	return user, err
+func EmailExists(db *gorm.DB, ctx context.Context, email string) (exists bool, err error) {
+	err = db.Model(&User {}).
+		Select("count(*) > 0").
+		Where(&User{Email: email}).
+		Find(&exists).Error
+	return exists, err
 }
 
-func GetByUsername(db *gorm.DB, ctx context.Context, username string) (user *User, err error) {
-	err = db.WithContext(ctx).Model(&User{}).Where(&User{Username: username}).First(&user).Error
-	return user, err
+func UsernameExists(db *gorm.DB, ctx context.Context, username string) (exists bool, err error) {
+	err = db.Model(&User {}).
+		Select("count(*) > 0").
+		Where(&User{Username: username}).
+		Find(&exists).Error
+	return exists, err
 }
 
 func RegisterUser(db *gorm.DB, ctx context.Context, user *User) error {
