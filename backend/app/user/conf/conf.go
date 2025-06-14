@@ -23,8 +23,22 @@ type MySQLConfig struct {
 	Loc       string `yaml:"loc"`
 }
 
+type RedisConfig struct {
+	Addr     string `yaml:"addr"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
+
+type JwtConfig struct {
+	Secret string `yaml:"secret"`
+	RefExpTime int `yaml:"refexptime"`
+	AccExpTime int `yaml:"accexptime"`
+}
+
 type Config struct {
 	MySQL MySQLConfig
+	Redis RedisConfig
+	Jwt JwtConfig
 }
 
 var(

@@ -6,6 +6,8 @@ package model
 
 import (
 	"context"
+	"errors"
+	"log"
 
 	"gorm.io/gorm"
 )
@@ -36,4 +38,34 @@ func UsernameExists(db *gorm.DB, ctx context.Context, username string) (exists b
 
 func RegisterUser(db *gorm.DB, ctx context.Context, user *User) error {
 	return db.Create(user).Error
+}
+
+func GetUserById(db *gorm.DB, ctx context.Context, userID uint) *User {
+	var user User
+	err := db.Model(&User {}).
+		Select("id").
+		Where("id = ?", userID).
+		First(&user).Error
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Fatalf("Unknow gorm error: %s", err.Error())
+		}
+		return nil
+	}
+	return &user
+}
+
+func GetUserByUsername(db *gorm.DB, ctx context.Context, username string) (*User, error) {
+	var user User
+	err := db.Model(&User {}).
+		Where(&User{Username: username}).
+		First(&user).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
 }

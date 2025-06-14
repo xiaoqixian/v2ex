@@ -6,11 +6,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/service"
+	"github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 )
 
 func main() {
 	r := gin.Default()
-	r.POST("/register", service.RegisterUser)
+	r.POST("/register", user_service.RegisterUser)
+	r.POST("/login", user_service.UserLogin)
+	r.POST("/refresh-token", user_service.RefreshToken)
 	r.Run(":8080")
 }

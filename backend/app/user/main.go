@@ -8,19 +8,22 @@ import (
 	"log"
 	"net"
 
+	"github.com/xiaoqixian/v2ex/backend/app/user/dal"
 	"github.com/xiaoqixian/v2ex/backend/app/user/service"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	dal.Init()
+
 	listener, err := net.Listen("tcp", ":8081")
 	if err != nil {
 		panic(err)
 	}
 
 	grpcServer := grpc.NewServer()
-	service, err := service.NewRegisterService()
+	service, err := service.NewUserService()
 	if err != nil {
 		panic(err)
 	}
