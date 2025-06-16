@@ -12,9 +12,16 @@
     </div>
     
     <div class="sidebar-box">
-      <div class="sidebar-content">
-        <button class="sign-button">现在注册</button>
-        <p>已注册用户请 <a href="#">登录</a></p>
+      <div v-if="!userStore.isLoggedIn" class="sidebar-content">
+        <router-link to="/register" class="sign-button">现在注册</router-link>
+        <p>已注册用户请 <router-link to="/login">登录</router-link></p>
+      </div>
+
+      <div v-if="userStore.isLoggedIn" class="sidebar-content" id="sidebar-profile-box">
+        <div class="avatar-box">
+          <img src="@/assets/default_avatar.png" alt="Avatar" />
+        </div>
+        <div class="username">Kaleidopink</div>
       </div>
     </div>
     
@@ -52,7 +59,11 @@
 <script setup>
 // 注入主题
 import { inject, ref } from 'vue';
+import { useUserStore } from '@/stores/user'
 const { current } = inject('theme', { current: ref('v2ex') });
+
+const userStore = useUserStore()
+
 </script>
 
 <style scoped>
@@ -94,7 +105,7 @@ const { current } = inject('theme', { current: ref('v2ex') });
   transition: color 0.3s ease;
 }
 
-.sign-button {
+.sidebar-content a.sign-button {
   display: block;
   width: 100%;
   padding: 8px 0;
@@ -108,7 +119,7 @@ const { current } = inject('theme', { current: ref('v2ex') });
   transition: background-color 0.3s ease;
 }
 
-.sign-button:hover {
+.sidebar-content a.sign-button:hover {
   opacity: 0.9;
 }
 
@@ -123,10 +134,6 @@ const { current } = inject('theme', { current: ref('v2ex') });
   color: var(--textSecondary);
   text-decoration: none;
   transition: color 0.3s ease;
-}
-
-.sidebar-content a:hover {
-  color: var(--accent);
 }
 
 .hot-topics {
@@ -153,5 +160,28 @@ const { current } = inject('theme', { current: ref('v2ex') });
 .hot-topic a:hover {
   text-decoration: underline;
   color: var(--accent);
+}
+
+.avatar-box {
+  flex: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-box img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  padding: 12px;
+}
+
+.username {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #333;
 }
 </style>

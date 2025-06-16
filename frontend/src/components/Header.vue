@@ -20,8 +20,9 @@
           </button>
         </div>
         <a href="#" class="nav-item">首页</a>
-        <router-link to="/register" class="nav-item">注册</router-link>
-        <a href="#" class="nav-item">登录</a>
+        <router-link v-if="!userStore.isLoggedIn" to="/register" class="nav-item">注册</router-link>
+        <router-link v-if="!userStore.isLoggedIn" to="/login" class="nav-item">登录</router-link>
+        <button v-if="userStore.isLoggedIn" @click="handleLogout" class="nav-item" id="logout-btn">登出</button>
       </nav>
     </div>
   </header>
@@ -29,9 +30,17 @@
 
 <script setup>
 import { inject } from 'vue';
+import { useUserStore } from "@/stores/user"
 
-// 注入主题相关状态和方法
+const userStore = useUserStore()
+
 const { current, themes, setTheme } = inject('theme');
+
+function handleLogout() {
+  localStorage.removeItem("access_token")
+  localStorage.removeItem("refresh_token")
+  userStore.logout()
+}
 </script>
 
 <style scoped>
@@ -111,6 +120,15 @@ const { current, themes, setTheme } = inject('theme');
   transition: color 0.2s ease, opacity 0.2s ease;
 }
 
+#logout-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logout-button:hover,
 .nav-item:hover {
   opacity: 1;
   color: var(--navHover);

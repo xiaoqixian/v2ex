@@ -1,22 +1,16 @@
 <template>
-  <form v-if="!isRegistered" class="register" @submit.prevent="handleRegister">
+  <form v-if="!isRegistered" class="login" @submit.prevent="handleLogin">
     <input v-model="form.username" type="text" placeholder="用户名" required />
-    <input v-model="form.email" type="email" placeholder="邮箱" required />
     <input v-model="form.password" type="password" placeholder="密码" required />
-    <input v-model="form.confirmPassword" type="password" placeholder="再次确认密码" required />
-    <button type="submit">注册</button>
+    <button type="submit">登录</button>
   </form>
-
-  <div v-else class="register">
-    <p style="font-size:18px; margin-bottom: 20px;">注册成功！</p>
-    <button @click="goToLogin">登录</button>
-  </div>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const form = reactive({
   username: '',
@@ -24,32 +18,36 @@ const form = reactive({
   password: '',
   confirmPassword: ''
 })
-
-const isRegistered = ref(false)
 const router = useRouter()
+const userStore = useUserStore()
 
-async function handleRegister() {
-  if (form.password !== form.confirmPassword) {
-    alert('两次密码不一致')
-    return
-  }
-
+async function handleLogin() {
   try {
-    const res = await axios.post('/api/register', {
+    const res = await axios.post('/api/login', {
       username: form.username,
-      email: form.email,
       password: form.password
-    })
-    console.log(res.data)
-    isRegistered.value = true
+    }, { withCredentials: true })
+
+    scheduleRefresh(res.data.expires_in)
+
+    userStore.login()
+    router.push("/")
   } catch (err) {
     console.error(err)
     alert(err.response.data.error)
   }
 }
 
-function goToLogin() {
-  router.push("/login")
+async function scheduleRefresh(expires_in) {
+  const delay = expires_in > 60 ? expires_in - 60 : expires_in;
+  setTimeout(async () => {
+    try {
+      await axios.post("/api/auth/refresh", { withCredentials: true })
+      scheduleRefresh(expires_in)
+    } catch (err) {
+      console.error('刷新 token 失败', err)
+    }
+  }, delay * 1000)
 }
 </script>
 
@@ -60,7 +58,7 @@ body {
 }
 
 
-.register {
+.login {
   overflow: hidden;
   background-color: white;
   padding: 40px 30px 30px 30px;
@@ -73,7 +71,7 @@ body {
   transition: transform 300ms, box-shadow 300ms;
   box-shadow: 5px 10px 10px rgba(2, 128, 144, 0.2);
 }
-.register::before, .register::after {
+.login::before, .login::after {
   content: "";
   position: absolute;
   width: 600px;
@@ -84,19 +82,19 @@ body {
   border-bottom-right-radius: 40%;
   z-index: -1;
 }
-.register::before {
+.login::before {
   left: 40%;
   bottom: -130%;
   background-color: rgba(69, 105, 144, 0.15);
   animation: wawes 6s infinite linear;
 }
-.register::after {
+.login::after {
   left: 35%;
   bottom: -125%;
   background-color: rgba(2, 128, 144, 0.2);
   animation: wawes 7s infinite;
 }
-.register > input {
+.login > input {
   font-family: "Asap", sans-serif;
   display: block;
   border-radius: 5px;
@@ -107,7 +105,7 @@ body {
   padding: 10px 10px;
   margin: 15px -10px;
 }
-.register > button {
+.login > button {
   font-family: "Asap", sans-serif;
   cursor: pointer;
   color: #fff;
@@ -122,7 +120,7 @@ body {
   background-color: #f45b69;
   transition: background-color 300ms;
 }
-.register > button:hover {
+.login > button:hover {
   background-color: #f24353;
 }
 

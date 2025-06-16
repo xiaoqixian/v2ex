@@ -30,6 +30,7 @@
 
 <script setup>
 import { ref, inject, computed, watch } from 'vue';
+import { useUserStore } from '@/stores/user'
 
 // 注入主题
 const { current } = inject('theme', { current: ref('v2ex') });
@@ -41,6 +42,8 @@ const props = defineProps({
     default: null
   }
 });
+
+const userStore = useUserStore()
 
 // 模拟数据
 const allTopics = ref([
@@ -145,11 +148,114 @@ const allTopics = ref([
   }
 ]);
 
+const myTopics = ref([
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/10_normal.png?m=1640000000',
+    title: '开源 ChatGPT 网页客户端 v3 发布，支持插件扩展',
+    node: '开源项目',
+    author: 'opengptdev',
+    time: '2 小时前',
+    lastReplyFrom: 'coderlong',
+    link: '#',
+    replyCount: 42,
+    category: '技术'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/11_normal.png?m=1640000001',
+    title: 'Figma 最新插件推荐：AI 布局优化器',
+    node: '工具推荐',
+    author: 'designhub',
+    time: '3 小时前',
+    lastReplyFrom: 'figmastar',
+    link: '#',
+    replyCount: 9,
+    category: '创意'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/12_normal.png?m=1640000002',
+    title: '自建 NAS 一周体验：软路由 + ZFS 方案分享',
+    node: '硬件',
+    author: 'techguy2024',
+    time: '30 分钟前',
+    lastReplyFrom: 'naslove',
+    link: '#',
+    replyCount: 27,
+    category: '技术'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/13_normal.png?m=1640000003',
+    title: '使用 Astro + Tailwind 快速构建博客站点',
+    node: '前端开发',
+    author: 'astrodev',
+    time: '1 小时 15 分钟前',
+    lastReplyFrom: 'mdxlover',
+    link: '#',
+    replyCount: 6,
+    category: '技术'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/14_normal.png?m=1640000004',
+    title: '低成本买到 iPhone 的另类方式：拼团盲盒？',
+    node: '奇思妙想',
+    author: 'thinker09',
+    time: '4 小时前',
+    lastReplyFrom: 'shoptips',
+    link: '#',
+    replyCount: 14,
+    category: '好玩'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/15_normal.png?m=1640000005',
+    title: '分享一个提升打字效率的 Vim 插件',
+    node: 'Vim',
+    author: 'vimkicker',
+    time: '20 分钟前',
+    lastReplyFrom: 'insertgod',
+    link: '#',
+    replyCount: 3,
+    category: '创意'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/16_normal.png?m=1640000006',
+    title: '618 快到了，大家都打算买啥数码产品？',
+    node: '数码',
+    author: 'salehunter',
+    time: '5 小时前',
+    lastReplyFrom: 'smartman',
+    link: '#',
+    replyCount: 66,
+    category: '交易'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/17_normal.png?m=1640000007',
+    title: '最近哪个 AI 聊天工具体验最好？分享一下',
+    node: '人工智能',
+    author: 'aiwatcher',
+    time: '2 小时 30 分钟前',
+    lastReplyFrom: 'huggingdev',
+    link: '#',
+    replyCount: 18,
+    category: '技术'
+  },
+  {
+    avatar: 'https://cdn.v2ex.com/avatar/d41d/8cd9/18_normal.png?m=1640000008',
+    title: '我做了一个 RSS 自动翻译工具（支持 DeepL）',
+    node: '自动化',
+    author: 'rssflow',
+    time: '1 小时前',
+    lastReplyFrom: 'linguist',
+    link: '#',
+    replyCount: 5,
+    category: '创意'
+  }
+]);
+
 // 根据分类筛选主题
 const filteredTopics = computed(() => {
-  if (!props.category) return allTopics.value;
+  const topics = userStore.isLoggedIn ? myTopics : allTopics;
+  if (!props.category) return topics.value;
   
-  return allTopics.value.filter(topic => {
+  return topics.value.filter(topic => {
     // 主分类匹配
     if (topic.category === props.category) return true;
     // 节点匹配（次级分类）
