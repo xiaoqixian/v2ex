@@ -86,5 +86,6 @@ func UserLogin(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, gin.H {
 		"message": "注册成功",
 		"expires_in": resp.AccessExpiresIn,
+		"user": resp.User,
 	})
 }

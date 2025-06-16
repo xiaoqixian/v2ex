@@ -27,6 +27,12 @@ message LoginResponse {
   string refresh_token = 4;
   int64 access_expires_in = 5; // in seconds
   int64 refresh_expires_in = 6; // in seconds
+
+  message User {
+    uint64 id = 1;
+  }
+
+  User user = 7;
 }
 
 message RefreshTokenRequest {

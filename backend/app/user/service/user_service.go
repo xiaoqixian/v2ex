@@ -122,6 +122,7 @@ func (impl *UserServiceImpl) Login(
 		}, nil
 	}
 	
+	log.Printf("User(%d, '%s') logged in\n", user.ID, user.Username)
 	return &userpb.LoginResponse {
 		Success: true,
 		Message: "登录成功",
@@ -129,6 +130,9 @@ func (impl *UserServiceImpl) Login(
 		RefreshToken: refreshToken,
 		AccessExpiresIn: int64(c.Jwt.AccExpTime),
 		RefreshExpiresIn: int64(c.Jwt.RefExpTime),
+		User: &userpb.LoginResponse_User {
+			Id: uint64(user.ID),
+		},
 	}, nil
 }
 
