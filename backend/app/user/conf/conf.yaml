@@ -16,6 +16,6 @@ redis:
 jwt:
   secret: "oJQFLx8O+jq7t3lgktV5CrvORkTUellZzhzptMht7dY="
   # refresh token expiration time, in hours
-  refexptime: 24
-  # access token expiration time, in minutes
-  accexptime: 15
+  refexptime: 86400
+  # access token expiration time, in seconds
+  accexptime: 900

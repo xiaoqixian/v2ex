@@ -127,8 +127,8 @@ func (impl *UserServiceImpl) Login(
 		Message: "登录成功",
 		AccessToken: accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn: int64(c.Jwt.AccExpTime),
-		TokenType: "Bearer",
+		AccessExpiresIn: int64(c.Jwt.AccExpTime),
+		RefreshExpiresIn: int64(c.Jwt.RefExpTime),
 	}, nil
 }
 
@@ -159,6 +159,16 @@ func (impl *UserServiceImpl) RefreshToken(
 	}, nil
 }
 
+func (impl *UserServiceImpl) AuthMe(
+	ctx context.Context,
+	in *userpb.AuthMeRequest,
+) (*userpb.AuthMeResponse, error) {
+	_, valid := parseToken(in.AccessToken)
+	return &userpb.AuthMeResponse {
+		Success: valid,
+	}, nil
+}
+
 func generateToken(userID uint, d time.Duration) (string, error) {
 	c := conf.GetConf()
 	claims := jwt.MapClaims {
@@ -174,10 +184,11 @@ func generateToken(userID uint, d time.Duration) (string, error) {
 func parseToken(tokenString string) (userid uint, valid bool) {
 	c := conf.GetConf()
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		return c.Jwt.Secret, nil
+		return []byte(c.Jwt.Secret), nil
 	})
 
 	if err != nil {
+		log.Printf("jwt token parse error: %s\n", err.Error())
 		return 0, false
 	}
 

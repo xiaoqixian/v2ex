@@ -21,13 +21,13 @@ type LoginArgs struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func UserLogin(gin_ctx *gin.Context) {
+func UserLogin(ginCtx *gin.Context) {
 	log.Println("New RegisterUser request")
 
 	var args LoginArgs
-	err := gin_ctx.ShouldBindJSON(&args)
+	err := ginCtx.ShouldBindJSON(&args)
 	if err != nil {
-		gin_ctx.JSON(http.StatusBadRequest, gin.H {
+		ginCtx.JSON(http.StatusBadRequest, gin.H {
 			"error": "JSON 请求解析错误",
 		})
 		return
@@ -35,7 +35,7 @@ func UserLogin(gin_ctx *gin.Context) {
 
 	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
 	if err != nil {
-		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
+		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),
 		})
 		return
@@ -53,23 +53,38 @@ func UserLogin(gin_ctx *gin.Context) {
 
 	resp, err := client.Login(ctx, &req)
 	if err != nil {
-		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
+		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": fmt.Sprintf("RPC 请求错误: %s", err.Error()),
 		})
 		return
 	}
 	if !resp.Success {
-		gin_ctx.JSON(http.StatusBadRequest, gin.H {
+		ginCtx.JSON(http.StatusBadRequest, gin.H {
 			"error": resp.Message,
 		})
 		return
 	}
 
-	gin_ctx.JSON(http.StatusOK, gin.H {
+	ginCtx.SetCookie(
+		"access_token",
+		resp.AccessToken,
+		int(resp.AccessExpiresIn),
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	ginCtx.SetCookie(
+		"refresh_token",
+		resp.RefreshToken,
+		int(resp.RefreshExpiresIn),
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	ginCtx.JSON(http.StatusOK, gin.H {
 		"message": "注册成功",
-		"access_token": resp.AccessToken,
-		"refresh_token": resp.RefreshToken,
-		"expires_in": resp.ExpiresIn,
-		"token_type": resp.TokenType,
+		"expires_in": resp.AccessExpiresIn,
 	})
 }
