@@ -30,7 +30,7 @@ async function handleLogin() {
 
     scheduleRefresh(res.data.expires_in)
 
-    userStore.login()
+    userStore.login(res.data.user.id)
     router.push("/")
   } catch (err) {
     console.error(err)
@@ -42,8 +42,9 @@ async function scheduleRefresh(expires_in) {
   const delay = expires_in > 60 ? expires_in - 60 : expires_in;
   setTimeout(async () => {
     try {
-      await axios.post("/api/auth/refresh", { withCredentials: true })
-      scheduleRefresh(expires_in)
+      const res = await axios.post("/api/auth/refresh", {}, { withCredentials: true })
+      const new_expires_in = res.data.expires_in || expires_in
+      scheduleRefresh(new_expires_in)
     } catch (err) {
       console.error('刷新 token 失败', err)
     }

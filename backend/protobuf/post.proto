@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package post;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "rpc_gen/postpb;postpb";
+
+message PublishPostRequest {
+  uint64 user_id = 1;
+  string title = 2;
+  string content = 3;
+  string node = 4;
+}
+
+message PublishPostResponse {
+  uint64 post_id = 1;
+  string message = 2;
+}
+
+message Post {
+  uint64 author_id = 1;
+  string title = 2;
+  string content = 3;
+  string node = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message GetPostsForUserRequest {
+  uint64 user_id = 1;
+}
+
+message GetPostsForUserResponse {
+  bool success = 1;
+  repeated Post posts = 2;
+}
+
+service PostService {
+  rpc PublishPost (PublishPostRequest) returns (PublishPostResponse);
+  rpc GetPostsForUser (GetPostsForUserRequest) returns (GetPostsForUserResponse);
+}

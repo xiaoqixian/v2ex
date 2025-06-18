@@ -1,0 +1,19 @@
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: lunar
+  password: lunar
+  dbname: v2ex
+  charset: utf8mb4
+  parseTime: true
+  loc: Local
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+kafka:
+  brokers:
+    - localhost:9092
+  topic: v2ex-post-activity

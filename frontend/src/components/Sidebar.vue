@@ -13,8 +13,8 @@
     
     <div class="sidebar-box">
       <div v-if="!userStore.isLoggedIn" class="sidebar-content">
-        <router-link to="/register" class="sign-button">现在注册</router-link>
-        <p>已注册用户请 <router-link to="/login">登录</router-link></p>
+        <router-link to="/login" class="sign-button">现在登录</router-link>
+        <p>未注册用户请 <router-link to="/register">注册</router-link></p>
       </div>
 
       <div v-if="userStore.isLoggedIn" class="sidebar-content" id="sidebar-profile-box">
@@ -23,6 +23,10 @@
         </div>
         <div class="username">Kaleidopink</div>
       </div>
+    </div>
+
+    <div v-if="userStore.isLoggedIn" class="sidebar-box" id="write">
+      <router-link to="/write">写点什么</router-link>
     </div>
     
     <div class="sidebar-box">
@@ -134,6 +138,14 @@ const userStore = useUserStore()
   color: var(--textSecondary);
   text-decoration: none;
   transition: color 0.3s ease;
+}
+
+#write {
+  padding: 10px;
+}
+#write a {
+  color: var(--textSecondary);
+  font-size: 16px;
 }
 
 .hot-topics {

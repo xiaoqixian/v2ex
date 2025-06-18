@@ -24,8 +24,11 @@ export const useUserStore = defineStore("user", {
         this.checked = true
       }
     },
-    login() {
+    login(userID) {
       this.isLoggedIn = true
+      this.userInfo = {
+        id: userID
+      }
     },
     logout() {
       this.isLoggedIn = false
