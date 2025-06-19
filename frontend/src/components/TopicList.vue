@@ -250,24 +250,55 @@ const myTopics = ref([
   }
 ]);
 
-// 根据分类筛选主题
+function formatTime(seconds) {
+  const now = Date.now();
+  const diffMillis = now - seconds * 1000;
+  const diffSec = Math.floor(diffMillis / 1000);
+
+  if (diffSec < 60) return diffSec + ' 秒前';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return diffMin + ' 分钟前';
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return diffHour + ' 小时前';
+  const diffDay = Math.floor(diffHour / 24);
+  return diffDay + ' 天前';
+}
+
+const getTopics = async () => {
+  let params = {}
+
+  if (userStore.isLoggedIn) {
+    params.userid = userStore.user.id
+  }
+
+  const res = await axios.get('/posts', { params })
+  return res.data.map(post => {
+    return {
+      avatar: 'https://cdn.v2ex.com/avatar/c4ca/4238/1_normal.png?m=1630513007',
+      title: post.title || '',
+      node: post.node || '',
+      author: `user_${post.author_id}` || '',
+      time: formatTime(post.created_at?.seconds || 0),
+      lastReplyFrom: 'Linus',
+      replyCount: 23,
+      category: '技术'
+    }
+  })
+}
+const topics = await getTopics()
+
 const filteredTopics = computed(() => {
-  const topics = userStore.isLoggedIn ? myTopics : allTopics;
-  if (!props.category) return topics.value;
+  if (!props.category) return topics;
   
-  return topics.value.filter(topic => {
-    // 主分类匹配
+  return topics.filter(topic => {
     if (topic.category === props.category) return true;
-    // 节点匹配（次级分类）
     if (topic.node === props.category) return true;
     return false;
   });
 });
 
-// 监听分类变化，可以在这里添加加载数据的逻辑
 watch(() => props.category, (newCategory) => {
   console.log(`加载 ${newCategory} 分类的数据`);
-  // 这里可以添加从API获取数据的逻辑
 });
 </script>
 

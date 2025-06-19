@@ -19,6 +19,7 @@ message PublishPostResponse {
 }
 
 message Post {
+  //TODO: add author_name field
   uint64 author_id = 1;
   string title = 2;
   string content = 3;

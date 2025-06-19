@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	post_service "github.com/xiaoqixian/v2ex/backend/app/home/service/post"
 	"github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 )
 
@@ -25,5 +26,8 @@ func main() {
 	r.POST("/login", user_service.UserLogin)
 	r.POST("/auth/refresh", user_service.RefreshToken)
 	r.GET("/auth/me", user_service.AuthMe)
+
+	r.GET("/posts", post_service.GetPosts)
+	r.POST("/posts", post_service.PublishPost)
 	r.Run(":8080")
 }
