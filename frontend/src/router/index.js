@@ -9,6 +9,7 @@ import Register from '@/views/Register.vue'
 import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Write from '@/views/Write.vue'
+import Post from '@/views/Post.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -21,6 +22,10 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/post/:id',
+    component: Post
+  }
 ]
 
 const router = createRouter({
