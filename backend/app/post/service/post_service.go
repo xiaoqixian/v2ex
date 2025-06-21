@@ -72,7 +72,7 @@ func (impl *PostServiceImpl) PublishPost(
 
 	return &postpb.PublishPostResponse {
 		PostId: uint64(post.ID),
-		Message: "",
+		Message: "发布成功",
 	}, nil
 }
 

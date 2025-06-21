@@ -17,7 +17,7 @@ import (
 )
 
 func GetPosts(ginCtx *gin.Context) {
-	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:8082", grpc.WithInsecure())
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),

@@ -17,7 +17,7 @@ import (
 func main() {
 	dal.Init()
 
-	listener, err := net.Listen("tcp", ":8081")
+	listener, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +29,7 @@ func main() {
 	}
 	postpb.RegisterPostServiceServer(grpcServer, service)
 
-	log.Println("Post service listening on :8081")
+	log.Println("Post service listening on :8082")
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		panic(err)
