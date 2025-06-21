@@ -7,13 +7,11 @@ package user_service
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
-	"google.golang.org/grpc"
 )
 
 type RefreshTokenArgs struct {
@@ -21,52 +19,45 @@ type RefreshTokenArgs struct {
 }
 
 func RefreshToken(ginCtx *gin.Context) {
-	log.Println("New RefreshToken request")
-
 	var args RefreshTokenArgs
 	if err := ginCtx.ShouldBindJSON(&args); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H {
-			"error": "JSON 请求解析错误",
+			"error": fmt.Sprintf("JSON bind error: %s", err.Error()),
 		})
 		return
 	}
 
-	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
-	if err != nil {
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),
-		})
-		return
-	}
-	defer conn.Close()
-
-	client := userpb.NewUserServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
-	defer cancel()
-	
 	req := userpb.RefreshTokenRequest {
 		RefreshToken: args.Token,
 	}
-	resp, err := client.RefreshToken(ctx, &req)
-	
+
+	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+		resp, err2 := client.RefreshToken(ctx, &req)
+		if err2 != nil {
+			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
+			})
+			return
+		}
+		if resp.AccessToken == "" {
+			ginCtx.JSON(http.StatusUnauthorized, gin.H {
+				"error": "Refresh token expired",
+			})
+			return
+		}
+
+		ginCtx.JSON(http.StatusOK, gin.H {
+			"access_token": resp.AccessToken,
+			"expires_in": resp.ExpiresIn,
+			"token_type": resp.TokenType,
+		})
+	}
+
+	err := util.WithRPCClient(":8081", userpb.NewUserServiceClient, callback)
+
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC 请求错误: %s", err.Error()),
+			"error": fmt.Sprintf("RPC error: %s", err.Error()),
 		})
-		return
 	}
-
-	if resp.AccessToken == "" {
-		ginCtx.JSON(http.StatusUnauthorized, gin.H {
-			"error": "Refresh token expired",
-		})
-		return
-	}
-
-	ginCtx.JSON(http.StatusOK, gin.H {
-		"access_token": resp.AccessToken,
-		"expires_in": resp.ExpiresIn,
-		"token_type": resp.TokenType,
-	})
 }

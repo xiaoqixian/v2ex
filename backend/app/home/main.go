@@ -27,7 +27,8 @@ func main() {
 	r.POST("/auth/refresh", user_service.RefreshToken)
 	r.GET("/auth/me", user_service.AuthMe)
 
-	r.GET("/posts", post_service.GetPosts)
+	r.GET("/user_posts/:user_id", post_service.GetPostsForUser)
+	r.GET("/posts/:post_id", post_service.GetPost)
 	r.POST("/posts", post_service.PublishPost)
 	r.Run(":8080")
 }

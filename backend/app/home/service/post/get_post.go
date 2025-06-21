@@ -1,4 +1,4 @@
-// Date:   Wed Jun 18 23:25:22 2025
+// Date:   Sat Jun 21 20:33:10 2025
 // Mail:   lunar_ubuntu@qq.com
 // Author: https://github.com/xiaoqixian
 
@@ -8,21 +8,28 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 )
 
-func PublishPost(ginCtx *gin.Context) {
-	var req postpb.PublishPostRequest
-	if err := ginCtx.ShouldBindJSON(&req); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H {})
+func GetPost(ginCtx *gin.Context) {
+	postID, err := strconv.Atoi(ginCtx.Param("post_id"))
+	if err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H {
+			"error": fmt.Sprintf("Invalid post_id: %s", ginCtx.Param("post_id")),
+		})
 		return
 	}
 
+	req := postpb.GetPostRequest {
+		PostId: uint64(postID),
+	}
+
 	callback := func(ctx context.Context, client postpb.PostServiceClient) {
-		resp, err2 := client.PublishPost(ctx, &req)
+		resp, err2 := client.GetPost(ctx, &req)
 		if err2 != nil {
 			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
@@ -30,13 +37,10 @@ func PublishPost(ginCtx *gin.Context) {
 			return
 		}
 
-		ginCtx.JSON(http.StatusOK, gin.H {
-			"message": resp.Message,
-			"postid": resp.PostId,
-		})
+		ginCtx.JSON(http.StatusOK, resp)
 	}
 
-	err := util.WithRPCClient(":8082", postpb.NewPostServiceClient, callback)
+	err = util.WithRPCClient(":8082", postpb.NewPostServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {

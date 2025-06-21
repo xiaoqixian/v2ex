@@ -9,11 +9,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
-	"google.golang.org/grpc"
 )
 
 func AuthMe(ginCtx *gin.Context) {
@@ -24,33 +23,25 @@ func AuthMe(ginCtx *gin.Context) {
 		return
 	}
 
-	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
-	if err != nil {
-		log.Printf("grpc.Dial: %s\n", err.Error())
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),
-		})
-		return
-	}
-	defer conn.Close()
-
-	client := userpb.NewUserServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
-	defer cancel()
-	
 	req := userpb.AuthMeRequest {
 		AccessToken: token,
 	}
-	resp, err := client.AuthMe(ctx, &req)
-	
-	if err != nil || !resp.Success {
-		if err != nil {
-			log.Printf("%s\n", err.Error())
+
+	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+		resp, err2 := client.AuthMe(ctx, &req)
+		if err2 != nil || !resp.Success {
+			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {})
+			return
 		}
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {})
-		return
+
+		ginCtx.JSON(http.StatusOK, gin.H {})
 	}
 
-	ginCtx.JSON(http.StatusOK, gin.H {})
+	err = util.WithRPCClient(":8081", userpb.NewUserServiceClient, callback)
+
+	if err != nil {
+		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+		})
+	}
 }

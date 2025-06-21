@@ -9,11 +9,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
-	"google.golang.org/grpc"
 )
 
 type RegisterArgs struct {
@@ -22,52 +21,49 @@ type RegisterArgs struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func RegisterUser(gin_ctx *gin.Context) {
+func RegisterUser(ginCtx *gin.Context) {
 	log.Println("New RegisterUser request")
 
 	var args RegisterArgs
-	err := gin_ctx.ShouldBindJSON(&args)
+	err := ginCtx.ShouldBindJSON(&args)
 	if err != nil {
-		gin_ctx.JSON(http.StatusBadRequest, gin.H {
-			"error": "JSON 请求解析错误",
+		ginCtx.JSON(http.StatusBadRequest, gin.H {
+			"error": fmt.Sprintf("JSON bind error: %s", err.Error()),
 		})
 		return
 	}
 
-	conn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
-	if err != nil {
-		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC 连接建立超时: %s", err.Error()),
-		})
-		return
-	}
-	defer conn.Close()
-
-	client := userpb.NewUserServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
-	defer cancel()
 	req := userpb.RegisterRequest {
 		Username: args.Username,
 		Email: args.Email,
 		Password: args.Password,
 	}
 
-	resp, err := client.Register(ctx, &req)
+	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+		resp, err2 := client.Register(ctx, &req)
+		if err2 != nil || !resp.Success {
+			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
+			})
+			return
+		}
+		if !resp.Success {
+			ginCtx.JSON(http.StatusBadRequest, gin.H {
+				"error": resp.Message,
+			})
+			return
+		}
+		
+		ginCtx.JSON(http.StatusOK, gin.H {
+			"message": "注册成功",
+		})
+	}
+
+	err = util.WithRPCClient(":8081", userpb.NewUserServiceClient, callback)
+
 	if err != nil {
-		gin_ctx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC 请求超时: %s", err.Error()),
+		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+			"error": fmt.Sprintf("RPC error: %s", err.Error()),
 		})
-		return
 	}
-	if !resp.Success {
-		gin_ctx.JSON(http.StatusBadRequest, gin.H {
-			"error": resp.Message,
-		})
-		return
-	}
-	
-	gin_ctx.JSON(http.StatusOK, gin.H {
-		"message": "注册成功",
-	})
 }
