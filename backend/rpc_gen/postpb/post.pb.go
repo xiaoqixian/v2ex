@@ -142,8 +142,247 @@ func (x *PublishPostResponse) GetMessage() string {
 	return ""
 }
 
-type Post struct {
+type GetPostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	PostId        uint64                 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPostRequest) Reset() {
+	*x = GetPostRequest{}
+	mi := &file_protobuf_post_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPostRequest) ProtoMessage() {}
+
+func (x *GetPostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_post_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPostRequest.ProtoReflect.Descriptor instead.
+func (*GetPostRequest) Descriptor() ([]byte, []int) {
+	return file_protobuf_post_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetPostRequest) GetPostId() uint64 {
+	if x != nil {
+		return x.PostId
+	}
+	return 0
+}
+
+type GetPostOkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Author        string                 `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
+	Node          string                 `protobuf:"bytes,3,opt,name=node,proto3" json:"node,omitempty"`
+	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPostOkResponse) Reset() {
+	*x = GetPostOkResponse{}
+	mi := &file_protobuf_post_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPostOkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPostOkResponse) ProtoMessage() {}
+
+func (x *GetPostOkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_post_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPostOkResponse.ProtoReflect.Descriptor instead.
+func (*GetPostOkResponse) Descriptor() ([]byte, []int) {
+	return file_protobuf_post_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetPostOkResponse) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GetPostOkResponse) GetAuthor() string {
+	if x != nil {
+		return x.Author
+	}
+	return ""
+}
+
+func (x *GetPostOkResponse) GetNode() string {
+	if x != nil {
+		return x.Node
+	}
+	return ""
+}
+
+func (x *GetPostOkResponse) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type GetPostErrResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPostErrResponse) Reset() {
+	*x = GetPostErrResponse{}
+	mi := &file_protobuf_post_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPostErrResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPostErrResponse) ProtoMessage() {}
+
+func (x *GetPostErrResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_post_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPostErrResponse.ProtoReflect.Descriptor instead.
+func (*GetPostErrResponse) Descriptor() ([]byte, []int) {
+	return file_protobuf_post_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetPostErrResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type GetPostResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Result:
+	//
+	//	*GetPostResponse_Ok
+	//	*GetPostResponse_Err
+	Result        isGetPostResponse_Result `protobuf_oneof:"result"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPostResponse) Reset() {
+	*x = GetPostResponse{}
+	mi := &file_protobuf_post_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPostResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPostResponse) ProtoMessage() {}
+
+func (x *GetPostResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_protobuf_post_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPostResponse.ProtoReflect.Descriptor instead.
+func (*GetPostResponse) Descriptor() ([]byte, []int) {
+	return file_protobuf_post_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetPostResponse) GetResult() isGetPostResponse_Result {
+	if x != nil {
+		return x.Result
+	}
+	return nil
+}
+
+func (x *GetPostResponse) GetOk() *GetPostOkResponse {
+	if x != nil {
+		if x, ok := x.Result.(*GetPostResponse_Ok); ok {
+			return x.Ok
+		}
+	}
+	return nil
+}
+
+func (x *GetPostResponse) GetErr() *GetPostErrResponse {
+	if x != nil {
+		if x, ok := x.Result.(*GetPostResponse_Err); ok {
+			return x.Err
+		}
+	}
+	return nil
+}
+
+type isGetPostResponse_Result interface {
+	isGetPostResponse_Result()
+}
+
+type GetPostResponse_Ok struct {
+	Ok *GetPostOkResponse `protobuf:"bytes,1,opt,name=ok,proto3,oneof"`
+}
+
+type GetPostResponse_Err struct {
+	Err *GetPostErrResponse `protobuf:"bytes,2,opt,name=err,proto3,oneof"`
+}
+
+func (*GetPostResponse_Ok) isGetPostResponse_Result() {}
+
+func (*GetPostResponse_Err) isGetPostResponse_Result() {}
+
+type Post struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TODO: add author_name field
 	AuthorId      uint64                 `protobuf:"varint,1,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
@@ -155,7 +394,7 @@ type Post struct {
 
 func (x *Post) Reset() {
 	*x = Post{}
-	mi := &file_protobuf_post_proto_msgTypes[2]
+	mi := &file_protobuf_post_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -167,7 +406,7 @@ func (x *Post) String() string {
 func (*Post) ProtoMessage() {}
 
 func (x *Post) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_post_proto_msgTypes[2]
+	mi := &file_protobuf_post_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -180,7 +419,7 @@ func (x *Post) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Post.ProtoReflect.Descriptor instead.
 func (*Post) Descriptor() ([]byte, []int) {
-	return file_protobuf_post_proto_rawDescGZIP(), []int{2}
+	return file_protobuf_post_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Post) GetAuthorId() uint64 {
@@ -227,7 +466,7 @@ type GetPostsForUserRequest struct {
 
 func (x *GetPostsForUserRequest) Reset() {
 	*x = GetPostsForUserRequest{}
-	mi := &file_protobuf_post_proto_msgTypes[3]
+	mi := &file_protobuf_post_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -239,7 +478,7 @@ func (x *GetPostsForUserRequest) String() string {
 func (*GetPostsForUserRequest) ProtoMessage() {}
 
 func (x *GetPostsForUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_post_proto_msgTypes[3]
+	mi := &file_protobuf_post_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -252,7 +491,7 @@ func (x *GetPostsForUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostsForUserRequest.ProtoReflect.Descriptor instead.
 func (*GetPostsForUserRequest) Descriptor() ([]byte, []int) {
-	return file_protobuf_post_proto_rawDescGZIP(), []int{3}
+	return file_protobuf_post_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetPostsForUserRequest) GetUserId() uint64 {
@@ -272,7 +511,7 @@ type GetPostsForUserResponse struct {
 
 func (x *GetPostsForUserResponse) Reset() {
 	*x = GetPostsForUserResponse{}
-	mi := &file_protobuf_post_proto_msgTypes[4]
+	mi := &file_protobuf_post_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -284,7 +523,7 @@ func (x *GetPostsForUserResponse) String() string {
 func (*GetPostsForUserResponse) ProtoMessage() {}
 
 func (x *GetPostsForUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_protobuf_post_proto_msgTypes[4]
+	mi := &file_protobuf_post_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -297,7 +536,7 @@ func (x *GetPostsForUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostsForUserResponse.ProtoReflect.Descriptor instead.
 func (*GetPostsForUserResponse) Descriptor() ([]byte, []int) {
-	return file_protobuf_post_proto_rawDescGZIP(), []int{4}
+	return file_protobuf_post_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetPostsForUserResponse) GetSuccess() bool {
@@ -326,7 +565,20 @@ const file_protobuf_post_proto_rawDesc = "" +
 	"\x04node\x18\x04 \x01(\tR\x04node\"H\n" +
 	"\x13PublishPostResponse\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\x04R\x06postId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xa2\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\")\n" +
+	"\x0eGetPostRequest\x12\x17\n" +
+	"\apost_id\x18\x01 \x01(\x04R\x06postId\"o\n" +
+	"\x11GetPostOkResponse\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
+	"\x06author\x18\x02 \x01(\tR\x06author\x12\x12\n" +
+	"\x04node\x18\x03 \x01(\tR\x04node\x12\x18\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\".\n" +
+	"\x12GetPostErrResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"t\n" +
+	"\x0fGetPostResponse\x12)\n" +
+	"\x02ok\x18\x01 \x01(\v2\x17.post.GetPostOkResponseH\x00R\x02ok\x12,\n" +
+	"\x03err\x18\x02 \x01(\v2\x18.post.GetPostErrResponseH\x00R\x03errB\b\n" +
+	"\x06result\"\xa2\x01\n" +
 	"\x04Post\x12\x1b\n" +
 	"\tauthor_id\x18\x01 \x01(\x04R\bauthorId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
@@ -339,10 +591,11 @@ const file_protobuf_post_proto_rawDesc = "" +
 	"\x17GetPostsForUserResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12 \n" +
 	"\x05posts\x18\x02 \x03(\v2\n" +
-	".post.PostR\x05posts2\xa1\x01\n" +
+	".post.PostR\x05posts2\xd9\x01\n" +
 	"\vPostService\x12B\n" +
 	"\vPublishPost\x12\x18.post.PublishPostRequest\x1a\x19.post.PublishPostResponse\x12N\n" +
-	"\x0fGetPostsForUser\x12\x1c.post.GetPostsForUserRequest\x1a\x1d.post.GetPostsForUserResponseB\x17Z\x15rpc_gen/postpb;postpbb\x06proto3"
+	"\x0fGetPostsForUser\x12\x1c.post.GetPostsForUserRequest\x1a\x1d.post.GetPostsForUserResponse\x126\n" +
+	"\aGetPost\x12\x14.post.GetPostRequest\x1a\x15.post.GetPostResponseB\x17Z\x15rpc_gen/postpb;postpbb\x06proto3"
 
 var (
 	file_protobuf_post_proto_rawDescOnce sync.Once
@@ -356,27 +609,35 @@ func file_protobuf_post_proto_rawDescGZIP() []byte {
 	return file_protobuf_post_proto_rawDescData
 }
 
-var file_protobuf_post_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_protobuf_post_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_protobuf_post_proto_goTypes = []any{
 	(*PublishPostRequest)(nil),      // 0: post.PublishPostRequest
 	(*PublishPostResponse)(nil),     // 1: post.PublishPostResponse
-	(*Post)(nil),                    // 2: post.Post
-	(*GetPostsForUserRequest)(nil),  // 3: post.GetPostsForUserRequest
-	(*GetPostsForUserResponse)(nil), // 4: post.GetPostsForUserResponse
-	(*timestamppb.Timestamp)(nil),   // 5: google.protobuf.Timestamp
+	(*GetPostRequest)(nil),          // 2: post.GetPostRequest
+	(*GetPostOkResponse)(nil),       // 3: post.GetPostOkResponse
+	(*GetPostErrResponse)(nil),      // 4: post.GetPostErrResponse
+	(*GetPostResponse)(nil),         // 5: post.GetPostResponse
+	(*Post)(nil),                    // 6: post.Post
+	(*GetPostsForUserRequest)(nil),  // 7: post.GetPostsForUserRequest
+	(*GetPostsForUserResponse)(nil), // 8: post.GetPostsForUserResponse
+	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
 }
 var file_protobuf_post_proto_depIdxs = []int32{
-	5, // 0: post.Post.created_at:type_name -> google.protobuf.Timestamp
-	2, // 1: post.GetPostsForUserResponse.posts:type_name -> post.Post
-	0, // 2: post.PostService.PublishPost:input_type -> post.PublishPostRequest
-	3, // 3: post.PostService.GetPostsForUser:input_type -> post.GetPostsForUserRequest
-	1, // 4: post.PostService.PublishPost:output_type -> post.PublishPostResponse
-	4, // 5: post.PostService.GetPostsForUser:output_type -> post.GetPostsForUserResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 0: post.GetPostResponse.ok:type_name -> post.GetPostOkResponse
+	4, // 1: post.GetPostResponse.err:type_name -> post.GetPostErrResponse
+	9, // 2: post.Post.created_at:type_name -> google.protobuf.Timestamp
+	6, // 3: post.GetPostsForUserResponse.posts:type_name -> post.Post
+	0, // 4: post.PostService.PublishPost:input_type -> post.PublishPostRequest
+	7, // 5: post.PostService.GetPostsForUser:input_type -> post.GetPostsForUserRequest
+	2, // 6: post.PostService.GetPost:input_type -> post.GetPostRequest
+	1, // 7: post.PostService.PublishPost:output_type -> post.PublishPostResponse
+	8, // 8: post.PostService.GetPostsForUser:output_type -> post.GetPostsForUserResponse
+	5, // 9: post.PostService.GetPost:output_type -> post.GetPostResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_protobuf_post_proto_init() }
@@ -384,13 +645,17 @@ func file_protobuf_post_proto_init() {
 	if File_protobuf_post_proto != nil {
 		return
 	}
+	file_protobuf_post_proto_msgTypes[5].OneofWrappers = []any{
+		(*GetPostResponse_Ok)(nil),
+		(*GetPostResponse_Err)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_protobuf_post_proto_rawDesc), len(file_protobuf_post_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

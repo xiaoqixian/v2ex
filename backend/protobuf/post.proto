@@ -18,6 +18,26 @@ message PublishPostResponse {
   string message = 2;
 }
 
+message GetPostRequest {
+  uint64 post_id = 1;
+}
+
+message GetPostOkResponse {
+  string title = 1;
+  string author = 2;
+  string node = 3;
+  string content = 4;
+}
+message GetPostErrResponse {
+  string message = 1;
+}
+message GetPostResponse {
+  oneof result {
+    GetPostOkResponse ok = 1;
+    GetPostErrResponse err = 2;
+  }
+}
+
 message Post {
   //TODO: add author_name field
   uint64 author_id = 1;
@@ -39,4 +59,5 @@ message GetPostsForUserResponse {
 service PostService {
   rpc PublishPost (PublishPostRequest) returns (PublishPostResponse);
   rpc GetPostsForUser (GetPostsForUserRequest) returns (GetPostsForUserResponse);
+  rpc GetPost (GetPostRequest) returns (GetPostResponse);
 }

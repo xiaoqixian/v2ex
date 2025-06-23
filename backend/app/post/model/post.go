@@ -22,6 +22,14 @@ func AddPost(db *gorm.DB, ctx context.Context, post *Post) error {
 	return db.Create(post).Error
 }
 
+func GetPostById(db *gorm.DB, ctx context.Context, postID uint) (*Post, error) {
+	var post Post
+	err := db.Model(&Post{}).
+		Where("id = ?", postID).
+		First(&post).Error
+	return &post, err
+}
+
 func GetPostsByUserID(db *gorm.DB, ctx context.Context, userID uint64) ([]Post, error) {
 	var posts []Post
 	err := db.Where("user_id = ?", userID).Order("created_at DESC").Find(&posts).Error

@@ -83,7 +83,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
 
 const title = ref('测试标题')
 const author = ref('测试作者')
@@ -103,6 +106,17 @@ const createTime = computed(() => {
 })
 
 const content = ref('同样的项目，idea 启动贼卡（一个小时） eclipse 启动两分钟。捣鼓了半天，加内存，换 idea ，换 jdk 都不行。最后把调试模式断点关闭，两分钟就起来了...醉了，删了所有断点就好使了。\n大家有类似的经历吗？说出来避避坑')
+
+async function fetchContent() {
+  try {
+    const res = axios.get(`/api/posts/${route.params.id}`)
+    title.value = res.data.title
+    author.value = res.data.author
+    createAt = res.data.createAt
+  } catch (err) {
+    alert("请求错误：", err.response?.data?.error? || "未知")
+  }
+}
 
 const replies = ref([
   {

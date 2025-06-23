@@ -47,6 +47,13 @@ func NewPostService() (*PostServiceImpl, error) {
 	}, nil
 }
 
+func (impl *PostServiceImpl) GetPost(
+	ctx context.Context,
+	in *postpb.GetPostRequest,
+) (*postpb.GetPostResponse, error) {
+	
+}
+
 func (impl *PostServiceImpl) PublishPost(
 	ctx context.Context,
 	in *postpb.PublishPostRequest,
