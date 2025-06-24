@@ -51,7 +51,31 @@ func (impl *PostServiceImpl) GetPost(
 	ctx context.Context,
 	in *postpb.GetPostRequest,
 ) (*postpb.GetPostResponse, error) {
-	
+	post, err := model.GetPostById(impl.db, ctx, uint(in.PostId))
+	if err != nil {
+		return nil, err
+	}
+	if post == nil {
+		return &postpb.GetPostResponse {
+			Result: &postpb.GetPostResponse_Err {
+				Err: &postpb.GetPostErrResponse {
+					Message: "Post not found",
+				},
+			},
+		}, nil
+	}
+
+	return &postpb.GetPostResponse {
+		Result: &postpb.GetPostResponse_Ok {
+			Ok: &postpb.GetPostOkResponse {
+				Title: post.Title,
+				Author: "Unknown", //TODO: Get author name by user id
+				Node: post.Node,
+				Content: post.Content,
+				CreatedAt: timestamppb.New(post.CreatedAt),
+			},
+		},
+	}, nil
 }
 
 func (impl *PostServiceImpl) PublishPost(

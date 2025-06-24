@@ -6,6 +6,7 @@ package model
 
 import (
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -27,6 +28,9 @@ func GetPostById(db *gorm.DB, ctx context.Context, postID uint) (*Post, error) {
 	err := db.Model(&Post{}).
 		Where("id = ?", postID).
 		First(&post).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &post, err
 }
 

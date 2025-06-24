@@ -192,6 +192,7 @@ type GetPostOkResponse struct {
 	Author        string                 `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
 	Node          string                 `protobuf:"bytes,3,opt,name=node,proto3" json:"node,omitempty"`
 	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -252,6 +253,13 @@ func (x *GetPostOkResponse) GetContent() string {
 		return x.Content
 	}
 	return ""
+}
+
+func (x *GetPostOkResponse) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
 }
 
 type GetPostErrResponse struct {
@@ -567,12 +575,14 @@ const file_protobuf_post_proto_rawDesc = "" +
 	"\apost_id\x18\x01 \x01(\x04R\x06postId\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\")\n" +
 	"\x0eGetPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x04R\x06postId\"o\n" +
+	"\apost_id\x18\x01 \x01(\x04R\x06postId\"\xaa\x01\n" +
 	"\x11GetPostOkResponse\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x02 \x01(\tR\x06author\x12\x12\n" +
 	"\x04node\x18\x03 \x01(\tR\x04node\x12\x18\n" +
-	"\acontent\x18\x04 \x01(\tR\acontent\".\n" +
+	"\acontent\x18\x04 \x01(\tR\acontent\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\".\n" +
 	"\x12GetPostErrResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"t\n" +
 	"\x0fGetPostResponse\x12)\n" +
@@ -623,21 +633,22 @@ var file_protobuf_post_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
 }
 var file_protobuf_post_proto_depIdxs = []int32{
-	3, // 0: post.GetPostResponse.ok:type_name -> post.GetPostOkResponse
-	4, // 1: post.GetPostResponse.err:type_name -> post.GetPostErrResponse
-	9, // 2: post.Post.created_at:type_name -> google.protobuf.Timestamp
-	6, // 3: post.GetPostsForUserResponse.posts:type_name -> post.Post
-	0, // 4: post.PostService.PublishPost:input_type -> post.PublishPostRequest
-	7, // 5: post.PostService.GetPostsForUser:input_type -> post.GetPostsForUserRequest
-	2, // 6: post.PostService.GetPost:input_type -> post.GetPostRequest
-	1, // 7: post.PostService.PublishPost:output_type -> post.PublishPostResponse
-	8, // 8: post.PostService.GetPostsForUser:output_type -> post.GetPostsForUserResponse
-	5, // 9: post.PostService.GetPost:output_type -> post.GetPostResponse
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	9, // 0: post.GetPostOkResponse.created_at:type_name -> google.protobuf.Timestamp
+	3, // 1: post.GetPostResponse.ok:type_name -> post.GetPostOkResponse
+	4, // 2: post.GetPostResponse.err:type_name -> post.GetPostErrResponse
+	9, // 3: post.Post.created_at:type_name -> google.protobuf.Timestamp
+	6, // 4: post.GetPostsForUserResponse.posts:type_name -> post.Post
+	0, // 5: post.PostService.PublishPost:input_type -> post.PublishPostRequest
+	7, // 6: post.PostService.GetPostsForUser:input_type -> post.GetPostsForUserRequest
+	2, // 7: post.PostService.GetPost:input_type -> post.GetPostRequest
+	1, // 8: post.PostService.PublishPost:output_type -> post.PublishPostResponse
+	8, // 9: post.PostService.GetPostsForUser:output_type -> post.GetPostsForUserResponse
+	5, // 10: post.PostService.GetPost:output_type -> post.GetPostResponse
+	8, // [8:11] is the sub-list for method output_type
+	5, // [5:8] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_protobuf_post_proto_init() }

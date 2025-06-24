@@ -37,7 +37,15 @@ func GetPost(ginCtx *gin.Context) {
 			return
 		}
 
-		ginCtx.JSON(http.StatusOK, resp)
+		if e, ok := resp.Result.(*postpb.GetPostResponse_Err); ok {
+			ginCtx.JSON(http.StatusNotFound, gin.H {
+				"error": e.Err.Message,
+			})
+			return
+		}
+
+		o, _ := resp.Result.(*postpb.GetPostResponse_Ok)
+		ginCtx.JSON(http.StatusOK, o.Ok)
 	}
 
 	err = util.WithRPCClient(":8082", postpb.NewPostServiceClient, callback)
