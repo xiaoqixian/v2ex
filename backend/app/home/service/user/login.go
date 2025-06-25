@@ -38,7 +38,7 @@ func UserLogin(ginCtx *gin.Context) {
 		resp, err2 := client.Login(ctx, &req)
 		if err2 != nil {
 			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-				"error": fmt.Sprintf("RPC error: %s", err.Error()),
+				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
 			})
 			return
 		}
@@ -75,7 +75,7 @@ func UserLogin(ginCtx *gin.Context) {
 		})
 	}
 
-	err = util.WithRPCClient(":8081", userpb.NewUserServiceClient, callback)
+	err = util.WithRPCClient("localhost:8081", userpb.NewUserServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {

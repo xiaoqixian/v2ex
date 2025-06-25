@@ -48,7 +48,7 @@ func GetPost(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, o.Ok)
 	}
 
-	err = util.WithRPCClient(":8082", postpb.NewPostServiceClient, callback)
+	err = util.WithRPCClient("localhost:8082", postpb.NewPostServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {

@@ -59,7 +59,7 @@ func RegisterUser(ginCtx *gin.Context) {
 		})
 	}
 
-	err = util.WithRPCClient(":8081", userpb.NewUserServiceClient, callback)
+	err = util.WithRPCClient("localhost:8081", userpb.NewUserServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {

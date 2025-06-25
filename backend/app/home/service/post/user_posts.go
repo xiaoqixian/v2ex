@@ -41,7 +41,7 @@ func GetPostsForUser(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusOK, resp.Posts)
 	}
 
-	err = util.WithRPCClient(":8082", postpb.NewPostServiceClient, callback)
+	err = util.WithRPCClient("localhost:8082", postpb.NewPostServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
