@@ -85,17 +85,18 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 const route = useRoute()
 
 const title = ref('测试标题')
 const author = ref('测试作者')
 const views = ref(1234)
-const createAt = 1750412014
+const createdAt = ref(1750412014)
 const createTime = computed(() => {
-  const now = Date.now()
-  const ts = String(createAt).length === 10 ? createAt * 1000 : createAt // 兼容秒/毫秒
-  const diff = Math.floor((now - ts) / 1000) // 差值（秒）
+  const now = Math.floor(Date.now() / 1000)
+  console.log(now)
+  const diff = now - createdAt.value
 
   if (diff < 60) return '刚刚'
   if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`
@@ -105,18 +106,26 @@ const createTime = computed(() => {
   return `${Math.floor(diff / 31536000)} 年前`
 })
 
-const content = ref('同样的项目，idea 启动贼卡（一个小时） eclipse 启动两分钟。捣鼓了半天，加内存，换 idea ，换 jdk 都不行。最后把调试模式断点关闭，两分钟就起来了...醉了，删了所有断点就好使了。\n大家有类似的经历吗？说出来避避坑')
+const content = ref('空白内容')
 
 async function fetchContent() {
   try {
-    const res = axios.get(`/api/posts/${route.params.id}`)
+    const res = await axios.get(`/api/posts/${route.params.id}`, {}, { withCredentials: true })
+    console.log(res.data)
     title.value = res.data.title
     author.value = res.data.author
-    createAt = res.data.createAt
+    createdAt.value = res.data.created_at.seconds
+    content.value = res.data.content
   } catch (err) {
-    alert("请求错误：", err.response?.data?.error? || "未知")
+    // alert("请求错误：" + (err.response?.data?.error || "未知"))
+    console.log(err)
   }
 }
+
+onMounted(() => {
+  console.log("onMounted called")
+  fetchContent()
+})
 
 const replies = ref([
   {
@@ -160,6 +169,7 @@ const replies = ref([
 
 <style>
 .v2ex-container {
+  text-align: left;
   max-width: 1000px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -237,6 +247,10 @@ const replies = ref([
   width: 48px;
   height: 48px;
   border-radius: 3px;
+}
+
+.post-info .time {
+  margin-right: 10px;
 }
 
 .post-content {
