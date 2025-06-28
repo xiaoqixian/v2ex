@@ -51,6 +51,17 @@ message AuthMeRequest {
 
 message AuthMeResponse {
   bool success = 1;
+  uint64 user_id = 2;
+}
+
+message GetUserInfoRequest {
+  uint64 user_id = 1;
+  bool just_check_exist = 2; // if true, just check if user exists
+}
+message GetUserInfoResponse {
+  bool exist = 1;
+  string name = 2;
+  string avatar = 3;
 }
 
 service UserService {
@@ -58,5 +69,7 @@ service UserService {
   rpc Login        (LoginRequest)        returns (LoginResponse);
   rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc AuthMe (AuthMeRequest) returns (AuthMeResponse);
+
+  rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse);
 }
 

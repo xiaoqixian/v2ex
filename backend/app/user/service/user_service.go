@@ -167,10 +167,32 @@ func (impl *UserServiceImpl) AuthMe(
 	ctx context.Context,
 	in *userpb.AuthMeRequest,
 ) (*userpb.AuthMeResponse, error) {
-	_, valid := parseToken(in.AccessToken)
+	userID, valid := parseToken(in.AccessToken)
 	return &userpb.AuthMeResponse {
 		Success: valid,
+		UserId: uint64(userID),
 	}, nil
+}
+
+func (impl *UserServiceImpl) GetUserInfo(
+	ctx context.Context,
+	in *userpb.GetUserInfoRequest,
+) (*userpb.GetUserInfoResponse, error) {
+	user := model.GetUserById(impl.db, ctx, uint(in.UserId))
+	if user == nil {
+		return &userpb.GetUserInfoResponse {
+			Exist: false,
+		}, nil
+	}
+
+	resp := &userpb.GetUserInfoResponse {
+		Exist: true,
+	}
+	if !in.JustCheckExist {
+		resp.Name = user.Username
+		resp.Avatar = user.Avator
+	}
+	return resp, nil
 }
 
 func generateToken(userID uint, d time.Duration) (string, error) {
