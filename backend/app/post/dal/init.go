@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/xiaoqixian/v2ex/backend/app/user/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/post/conf"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

@@ -1,4 +1,4 @@
-module github.com/xiaoqixian/v2ex/backend/app/user
+module github.com/xiaoqixian/v2ex/backend/app/post
 
 go 1.24.3
 

@@ -8,8 +8,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/xiaoqixian/v2ex/backend/app/user/dal"
-	"github.com/xiaoqixian/v2ex/backend/app/user/service"
+	"github.com/xiaoqixian/v2ex/backend/app/common/util"
+	"github.com/xiaoqixian/v2ex/backend/app/post/dal"
+	"github.com/xiaoqixian/v2ex/backend/app/post/service"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 	"google.golang.org/grpc"
 )
@@ -17,10 +18,14 @@ import (
 func main() {
 	dal.Init()
 
-	listener, err := net.Listen("tcp", ":8082")
+	const addr = "localhost:8082"
+
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
+
+	util.RegisterService("post-service", "post-service", addr)
 
 	grpcServer := grpc.NewServer()
 	service, err := service.NewPostService()
@@ -29,7 +34,7 @@ func main() {
 	}
 	postpb.RegisterPostServiceServer(grpcServer, service)
 
-	log.Println("Post service listening on :8082")
+	log.Printf("Post service listening on %s\n", addr)
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		panic(err)

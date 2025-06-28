@@ -19,8 +19,12 @@ type Post struct {
 	Content string `json:"content"  gorm:"type:text;not null"`
 }
 
-func AddPost(db *gorm.DB, ctx context.Context, post *Post) error {
-	return db.Create(post).Error
+func AddPost(db *gorm.DB, ctx context.Context, post *Post) (uint, error) {
+	err := db.Create(post).Error
+	if err != nil {
+		return 0, err
+	}
+	return post.ID, nil
 }
 
 func GetPostById(db *gorm.DB, ctx context.Context, postID uint) (*Post, error) {
