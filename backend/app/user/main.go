@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/xiaoqixian/v2ex/backend/app/common/util"
 	"github.com/xiaoqixian/v2ex/backend/app/user/dal"
 	"github.com/xiaoqixian/v2ex/backend/app/user/service"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
@@ -17,10 +18,14 @@ import (
 func main() {
 	dal.Init()
 
-	listener, err := net.Listen("tcp", ":8081")
+	const addr = "localhost:8081"
+
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
+
+	util.RegisterService("user-service", "user-service", addr)
 
 	grpcServer := grpc.NewServer()
 	service, err := service.NewUserService()
@@ -29,7 +34,7 @@ func main() {
 	}
 	userpb.RegisterUserServiceServer(grpcServer, service)
 
-	log.Println("user service listening on :8081")
+	log.Printf("user service listening on %s\n", addr)
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		panic(err)
