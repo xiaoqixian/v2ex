@@ -12,10 +12,10 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
-	"github.com/xiaoqixian/v2ex/backend/app/user/conf"
-	"github.com/xiaoqixian/v2ex/backend/app/user/dal"
-	"github.com/xiaoqixian/v2ex/backend/app/user/model"
-	"github.com/xiaoqixian/v2ex/backend/app/user/mq"
+	"github.com/xiaoqixian/v2ex/backend/app/post/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/post/dal"
+	"github.com/xiaoqixian/v2ex/backend/app/post/model"
+	"github.com/xiaoqixian/v2ex/backend/app/post/mq"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
@@ -65,6 +65,15 @@ func (impl *PostServiceImpl) GetPost(
 		}, nil
 	}
 
+	// Write ViewPost message to kafka mq
+	if in.UserId != 0 {
+		log.Printf("write view post message to kafka\n")
+		err = impl.writeViewPostMsg(ctx, post.ID, uint(in.UserId))
+		if err != nil {
+			log.Printf("Write kafka error: %s\n", err.Error())
+		}
+	}
+
 	return &postpb.GetPostResponse {
 		Result: &postpb.GetPostResponse_Ok {
 			Ok: &postpb.GetPostOkResponse {
@@ -97,6 +106,7 @@ func (impl *PostServiceImpl) PublishPost(
 
 	// Write AddPost message to kafka mq
 	err = impl.writeAddPostMsg(ctx, post.ID, uint(in.UserId), in.Node)
+	log.Println("Write a AddPost message to kafka")
 	if err != nil {
 		log.Printf("Write kafka error: %s\n", err.Error())
 	}
@@ -150,6 +160,24 @@ func (impl *PostServiceImpl) writeAddPostMsg(ctx context.Context, postID uint, u
 
 	msg := kafka.Message {
 		Key: []byte("add-post"),
+		Value: data,
+		Time: time.Now(),
+	}
+
+	return impl.kafkaProducer.WriteMessages(ctx, msg)
+}
+
+func (impl *PostServiceImpl) writeViewPostMsg(ctx context.Context, postID uint, userID uint) error {
+	data, err := json.Marshal(&mq.ViewPostMessage {
+		UserID: userID,
+		PostID: postID,
+	})
+	if err != nil {
+		return err
+	}
+
+	msg := kafka.Message {
+		Key: []byte("view-post"),
 		Value: data,
 		Time: time.Now(),
 	}
