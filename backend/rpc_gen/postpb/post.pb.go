@@ -143,8 +143,10 @@ func (x *PublishPostResponse) GetMessage() string {
 }
 
 type GetPostRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	PostId uint64                 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+	// 0 represents invalid user id, hence the user is not logged in.
+	UserId        uint64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -182,6 +184,13 @@ func (*GetPostRequest) Descriptor() ([]byte, []int) {
 func (x *GetPostRequest) GetPostId() uint64 {
 	if x != nil {
 		return x.PostId
+	}
+	return 0
+}
+
+func (x *GetPostRequest) GetUserId() uint64 {
+	if x != nil {
+		return x.UserId
 	}
 	return 0
 }
@@ -573,9 +582,10 @@ const file_protobuf_post_proto_rawDesc = "" +
 	"\x04node\x18\x04 \x01(\tR\x04node\"H\n" +
 	"\x13PublishPostResponse\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\x04R\x06postId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\")\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"B\n" +
 	"\x0eGetPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x04R\x06postId\"\xaa\x01\n" +
+	"\apost_id\x18\x01 \x01(\x04R\x06postId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x04R\x06userId\"\xaa\x01\n" +
 	"\x11GetPostOkResponse\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
 	"\x06author\x18\x02 \x01(\tR\x06author\x12\x12\n" +

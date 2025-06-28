@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package post;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "rpc_gen/commentpb;commentpb";
+
+message Comment {
+  uint64 comment_id = 1;
+  uint64 user_id = 2;
+  string content = 3;
+  uint32 likes = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message AddCommentRequest {
+  uint64 user_id = 1;
+  uint64 post_id = 2;
+  string content = 3;
+}
+
+message AddCommentResponse {
+  bool success = 1;
+  uint64 comment_id = 2;
+}
+
+message GetCommentsReqeust {
+  uint64 post_id = 1;
+}
+
+message GetCommentsResponse {
+  repeated Comment comments = 1;
+}
+
+service CommentService {
+  rpc AddComment (AddCommentRequest) returns (AddCommentResponse);
+  rpc GetComments (GetCommentsReqeust) returns (GetCommentsResponse);
+}

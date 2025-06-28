@@ -20,6 +20,8 @@ message PublishPostResponse {
 
 message GetPostRequest {
   uint64 post_id = 1;
+  // 0 represents invalid user id, hence the user is not logged in.
+  uint64 user_id = 2;
 }
 
 message GetPostOkResponse {
