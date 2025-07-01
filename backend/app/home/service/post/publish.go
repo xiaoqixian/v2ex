@@ -6,11 +6,10 @@ package post_service
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 )
 
@@ -21,26 +20,24 @@ func PublishPost(ginCtx *gin.Context) {
 		return
 	}
 
-	callback := func(ctx context.Context, client postpb.PostServiceClient) {
+	callback := func(ctx context.Context, client postpb.PostServiceClient) error {
 		resp, err2 := client.PublishPost(ctx, &req)
 		if err2 != nil {
-			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
-			})
-			return
+			return err2
 		}
 
 		ginCtx.JSON(http.StatusOK, gin.H {
 			"message": resp.Message,
 			"postid": resp.PostId,
 		})
+		return nil
 	}
 
-	err := util.WithRPCClient("localhost:8082", postpb.NewPostServiceClient, callback)
+	err := rpcutil.WithRPCClient("post-service", postpb.NewPostServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+			"error": err.Error(),
 		})
 	}
 }

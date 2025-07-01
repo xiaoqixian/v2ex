@@ -11,7 +11,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
@@ -27,21 +27,24 @@ func AuthMe(ginCtx *gin.Context) {
 		AccessToken: token,
 	}
 
-	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+	callback := func(ctx context.Context, client userpb.UserServiceClient) error {
 		resp, err2 := client.AuthMe(ctx, &req)
-		if err2 != nil || !resp.Success {
-			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {})
-			return
+		if err2 != nil {
+			return err2
+		}
+		if !resp.Success {
+			return fmt.Errorf("rpc AuthMe failed")
 		}
 
 		ginCtx.JSON(http.StatusOK, gin.H {})
+		return nil
 	}
 
-	err = util.WithRPCClient("localhost:8081", userpb.NewUserServiceClient, callback)
+	err = rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+			"error": err.Error(),
 		})
 	}
 }

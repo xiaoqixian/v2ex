@@ -37,7 +37,8 @@ func RegisterService(id string, name string, addr string) {
 		Address: host,
 		Port: port,
 		Check: &consul.AgentServiceCheck {
-			HTTP: fmt.Sprintf("http://localhost:%d/health", port),
+			GRPC: addr,
+			GRPCUseTLS: false,
 			Interval: "10s",
 			Timeout: "2s",
 			DeregisterCriticalServiceAfter: "30s",
@@ -49,5 +50,5 @@ func RegisterService(id string, name string, addr string) {
 		log.Fatalf("register service failed: %s\n", err.Error())
 	}
 	
-	fmt.Println("Service registered successfully!")
+	fmt.Printf("Service %s registered successfully!\n", id)
 }

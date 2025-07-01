@@ -11,7 +11,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
@@ -39,31 +39,26 @@ func RegisterUser(ginCtx *gin.Context) {
 		Password: args.Password,
 	}
 
-	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+	callback := func(ctx context.Context, client userpb.UserServiceClient) error {
 		resp, err2 := client.Register(ctx, &req)
 		if err2 != nil || !resp.Success {
-			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
-			})
-			return
+			return err2
 		}
 		if !resp.Success {
-			ginCtx.JSON(http.StatusBadRequest, gin.H {
-				"error": resp.Message,
-			})
-			return
+			return fmt.Errorf("rpc Register failed")
 		}
 		
 		ginCtx.JSON(http.StatusOK, gin.H {
 			"message": "注册成功",
 		})
+		return nil
 	}
 
-	err = util.WithRPCClient("localhost:8081", userpb.NewUserServiceClient, callback)
+	err = rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+			"error": err.Error(),
 		})
 	}
 }

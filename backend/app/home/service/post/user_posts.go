@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 )
 
@@ -29,23 +29,21 @@ func GetPostsForUser(ginCtx *gin.Context) {
 		UserId: uint64(userID),
 	}
 
-	callback := func(ctx context.Context, client postpb.PostServiceClient) {
+	callback := func(ctx context.Context, client postpb.PostServiceClient) error {
 		resp, err2 := client.GetPostsForUser(ctx, &req)
 		if err2 != nil {
-			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
-			})
-			return
+			return err2
 		}
 
 		ginCtx.JSON(http.StatusOK, resp.Posts)
+		return nil
 	}
 
-	err = util.WithRPCClient("localhost:8082", postpb.NewPostServiceClient, callback)
+	err = rpcutil.WithRPCClient("localhost:8082", postpb.NewPostServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+			"error": err.Error(),
 		})
 	}
 }

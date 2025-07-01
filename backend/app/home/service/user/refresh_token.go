@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
@@ -31,19 +31,13 @@ func RefreshToken(ginCtx *gin.Context) {
 		RefreshToken: args.Token,
 	}
 
-	callback := func(ctx context.Context, client userpb.UserServiceClient) {
+	callback := func(ctx context.Context, client userpb.UserServiceClient) error {
 		resp, err2 := client.RefreshToken(ctx, &req)
 		if err2 != nil {
-			ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-				"error": fmt.Sprintf("RPC error: %s", err2.Error()),
-			})
-			return
+			return err2
 		}
 		if resp.AccessToken == "" {
-			ginCtx.JSON(http.StatusUnauthorized, gin.H {
-				"error": "Refresh token expired",
-			})
-			return
+			return fmt.Errorf("RefreshToken expired")
 		}
 
 		ginCtx.JSON(http.StatusOK, gin.H {
@@ -51,13 +45,14 @@ func RefreshToken(ginCtx *gin.Context) {
 			"expires_in": resp.ExpiresIn,
 			"token_type": resp.TokenType,
 		})
+		return nil
 	}
 
-	err := util.WithRPCClient("localhost:8081", userpb.NewUserServiceClient, callback)
+	err := rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, callback)
 
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": fmt.Sprintf("RPC error: %s", err.Error()),
+			"error": err.Error(),
 		})
 	}
 }

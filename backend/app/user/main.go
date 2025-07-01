@@ -13,6 +13,8 @@ import (
 	"github.com/xiaoqixian/v2ex/backend/app/user/service"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
 func main() {
@@ -33,6 +35,11 @@ func main() {
 		panic(err)
 	}
 	userpb.RegisterUserServiceServer(grpcServer, service)
+
+	// register grpc health check service
+	healthServer := health.NewServer()
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 
 	log.Printf("user service listening on %s\n", addr)
 	err = grpcServer.Serve(listener)
