@@ -48,19 +48,23 @@
         </article>
       </div>
 
-      <div class="reply-box">
+      <div v-if="userStore.isLoggedIn" class="reply-box">
         <div class="reply-editor">
           <div class="reply-title">回复</div>
-          <textarea class="reply-textarea" placeholder="写下你的回复..."></textarea>
+          <textarea v-model="myComment" class="reply-textarea" placeholder="写下你的回复..."></textarea>
           <div class="reply-submit">
-            <button class="submit-btn">提交回复</button>
+            <button class="submit-btn" @click="submitComment">提交回复</button>
           </div>
         </div>
       </div>
 
+      <div v-if="!userStore.isLoggedIn" class="login-hint">
+        请<router-link to="/login">登录</router-link>以后再提交回复
+      </div>
+
       <div class="replies">
         <div class="replies-header">
-          <h2>25 条回复</h2>
+          <h2>{{ commentsSize }}条回复</h2>
           <span class="replies-time">2025-06-20 13:21:34 +08:00</span>
         </div>
         
@@ -86,8 +90,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { useUserStore } from '@/stores/user';
 
 const route = useRoute()
+const userStore = useUserStore()
 
 const title = ref('测试标题')
 const author = ref('测试作者')
@@ -106,7 +112,13 @@ const createTime = computed(() => {
   return `${Math.floor(diff / 31536000)} 年前`
 })
 
-const content = ref('空白内容')
+const content = ref('')
+const comments = ref([])
+const myComment = ref('')
+
+const commentsSize = computed(() => {
+  return comments.value.length
+})
 
 async function fetchContent() {
   try {
@@ -117,54 +129,44 @@ async function fetchContent() {
     createdAt.value = res.data.created_at.seconds
     content.value = res.data.content
   } catch (err) {
-    // alert("请求错误：" + (err.response?.data?.error || "未知"))
-    console.log(err)
+    console.error(err)
+  }
+}
+
+async function fetchComments() {
+  try {
+    const res = await axios.get(`/api/comments/${route.params.id}`, {}, { withCredentials: true })
+    comments.value = res.data
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function submitComment() {
+  try {
+    if (myComment.value == "") {
+      alert("评论内容不可为空")
+      return
+    }
+
+    const res = await axios.post(`/api/comments/${route.params.id}`, {
+      user_id: userStore.userInfo.id,
+      content: myComment.value,
+    }, {
+      withCredentials: true
+    })
+
+    await fetchComments()
+  } catch (err) {
+    console.error(err)
   }
 }
 
 onMounted(() => {
-  console.log("onMounted called")
   fetchContent()
+  fetchComments()
 })
 
-const replies = ref([
-  {
-    author: 'layxy',
-    time: '1 天前',
-    href: "@/assets/avatar1.png",
-    content: '断点打到方法上或者某些特殊的地方,会影响启动,之前遇到过,而且现在还容易卡断点,尤其是查数据库的地方'
-  },
-  {
-    author: 'opengps',
-    time: '1 天前',
-    href: "@/assets/avatar6.png",
-    content: '所以说正式发布不应该带着调试文件 (@db 之类)'
-  },
-  {
-    author: 'kk2syc',
-    time: '1 天前',
-    href: "@/assets/avatar5.png",
-    content: '你就没想过为什么吗？因为有断点打在方法上面了。<br><br>IntelliJ IDEA Help: Note that using method breakpoints can slow down the application you are debugging@'
-  },
-  {
-    author: 'miael@K',
-    time: '1 天前 via Android',
-    href: "@/assets/avatar4.png",
-    content: '@layxy 对，我好像打在 aop 上了，但之前没事，拉了一段时间的代码就不行了，当时查代码也没看出啥来，现在也无从查证了'
-  },
-  {
-    author: 'miael@K',
-    time: '1 天前 via Android',
-    href: "@/assets/avatar3.png",
-    content: '@kk2syc 还真没注意过，下次留意下，感谢'
-  },
-  {
-    author: 'Kiriri',
-    time: '1 天前',
-    href: "@/assets/avatar2.png",
-    content: '断点上加 condition 也会影响'
-  }
-]);
 </script>
 
 <style>
@@ -443,5 +445,9 @@ const replies = ref([
 
 .submit-btn:hover {
   background-color: #005bb7;
+}
+
+.login-hint {
+  text-align: center;
 }
 </style>
