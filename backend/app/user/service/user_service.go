@@ -74,7 +74,7 @@ func (impl *UserServiceImpl) Register(
 		Email: in.Email,
 		PasswordHashed: string(hashedPassword),
 		Username: in.Username,
-		Avator: "",
+		Avatar: "",
 	}
 
 	err = model.RegisterUser(impl.db, ctx, user)
@@ -146,7 +146,7 @@ func (impl *UserServiceImpl) RefreshToken(
 		return &userpb.RefreshTokenResponse {}, nil
 	}
 
-	if user := model.GetUserById(impl.db, ctx, userID); user == nil {
+	if user := model.GetUserInfoById(impl.db, ctx, userID); user == nil {
 		return &userpb.RefreshTokenResponse {}, nil
 	}
 	
@@ -178,7 +178,7 @@ func (impl *UserServiceImpl) GetUserInfo(
 	ctx context.Context,
 	in *userpb.GetUserInfoRequest,
 ) (*userpb.GetUserInfoResponse, error) {
-	user := model.GetUserById(impl.db, ctx, uint(in.UserId))
+	user := model.GetUserInfoById(impl.db, ctx, uint(in.UserId))
 	if user == nil {
 		return &userpb.GetUserInfoResponse {
 			Exist: false,
@@ -190,9 +190,31 @@ func (impl *UserServiceImpl) GetUserInfo(
 	}
 	if !in.JustCheckExist {
 		resp.Name = user.Username
-		resp.Avatar = user.Avator
+		resp.Avatar = user.Avatar
 	}
 	return resp, nil
+}
+
+func (impl *UserServiceImpl) GetBatchUserInfo(
+	ctx context.Context,
+	in *userpb.GetBatchUserInfoRequest,
+) (*userpb.GetBatchUserInfoResponse, error) {
+	userInfoList := make([]*userpb.GetUserInfoResponse, 0, len(in.UserIdList))
+	
+	for _, id := range in.UserIdList {
+		user := model.GetUserInfoById(impl.db, ctx, uint(id))
+		if user == nil {
+			continue
+		}
+		userInfoList = append(userInfoList, &userpb.GetUserInfoResponse {
+			Exist: true,
+			Name: user.Username,
+			Avatar: user.Avatar,
+		})
+	}
+	return &userpb.GetBatchUserInfoResponse {
+		UserInfoList: userInfoList,
+	}, nil
 }
 
 func generateToken(userID uint, d time.Duration) (string, error) {

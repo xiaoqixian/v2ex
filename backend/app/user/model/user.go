@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"log"
-
 	"gorm.io/gorm"
 )
 
@@ -17,7 +16,12 @@ type User struct {
 	Email          string `json:"email" gorm:"unique;unique_index"`
 	PasswordHashed string `json:"passwordHashed" gorm:"type:varchar(255) not null"`
 	Username       string `json:"username"`
-	Avator         string `json:"avator"`
+	Avatar         string `json:"avatar"`
+}
+
+type UserInfo struct {
+	Username string `json:"username"`
+	Avatar string `json:"avatar"`
 }
 
 func EmailExists(db *gorm.DB, ctx context.Context, email string) (exists bool, err error) {
@@ -40,10 +44,10 @@ func RegisterUser(db *gorm.DB, ctx context.Context, user *User) error {
 	return db.Create(user).Error
 }
 
-func GetUserById(db *gorm.DB, ctx context.Context, userID uint) *User {
+func GetUserInfoById(db *gorm.DB, ctx context.Context, userID uint) *User {
 	var user User
 	err := db.Model(&User {}).
-		Select("id").
+		Select("username, avatar").
 		Where("id = ?", userID).
 		First(&user).Error
 	if err != nil {

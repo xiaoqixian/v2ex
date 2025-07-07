@@ -64,6 +64,13 @@ message GetUserInfoResponse {
   string avatar = 3;
 }
 
+message GetBatchUserInfoRequest {
+  repeated uint64 user_id_list = 1;
+}
+message GetBatchUserInfoResponse {
+  repeated GetUserInfoResponse user_info_list = 1;
+}
+
 service UserService {
   rpc Register     (RegisterRequest)     returns (RegisterResponse);
   rpc Login        (LoginRequest)        returns (LoginResponse);
@@ -71,5 +78,6 @@ service UserService {
   rpc AuthMe (AuthMeRequest) returns (AuthMeResponse);
 
   rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse);
+  rpc GetBatchUserInfo (GetBatchUserInfoRequest) returns (GetBatchUserInfoResponse);
 }
 

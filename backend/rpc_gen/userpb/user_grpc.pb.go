@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName     = "/user.UserService/Register"
-	UserService_Login_FullMethodName        = "/user.UserService/Login"
-	UserService_RefreshToken_FullMethodName = "/user.UserService/RefreshToken"
-	UserService_AuthMe_FullMethodName       = "/user.UserService/AuthMe"
-	UserService_GetUserInfo_FullMethodName  = "/user.UserService/GetUserInfo"
+	UserService_Register_FullMethodName         = "/user.UserService/Register"
+	UserService_Login_FullMethodName            = "/user.UserService/Login"
+	UserService_RefreshToken_FullMethodName     = "/user.UserService/RefreshToken"
+	UserService_AuthMe_FullMethodName           = "/user.UserService/AuthMe"
+	UserService_GetUserInfo_FullMethodName      = "/user.UserService/GetUserInfo"
+	UserService_GetBatchUserInfo_FullMethodName = "/user.UserService/GetBatchUserInfo"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -35,6 +36,7 @@ type UserServiceClient interface {
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	AuthMe(ctx context.Context, in *AuthMeRequest, opts ...grpc.CallOption) (*AuthMeResponse, error)
 	GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error)
+	GetBatchUserInfo(ctx context.Context, in *GetBatchUserInfoRequest, opts ...grpc.CallOption) (*GetBatchUserInfoResponse, error)
 }
 
 type userServiceClient struct {
@@ -95,6 +97,16 @@ func (c *userServiceClient) GetUserInfo(ctx context.Context, in *GetUserInfoRequ
 	return out, nil
 }
 
+func (c *userServiceClient) GetBatchUserInfo(ctx context.Context, in *GetBatchUserInfoRequest, opts ...grpc.CallOption) (*GetBatchUserInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBatchUserInfoResponse)
+	err := c.cc.Invoke(ctx, UserService_GetBatchUserInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type UserServiceServer interface {
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	AuthMe(context.Context, *AuthMeRequest) (*AuthMeResponse, error)
 	GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error)
+	GetBatchUserInfo(context.Context, *GetBatchUserInfoRequest) (*GetBatchUserInfoResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedUserServiceServer) AuthMe(context.Context, *AuthMeRequest) (*
 }
 func (UnimplementedUserServiceServer) GetUserInfo(context.Context, *GetUserInfoRequest) (*GetUserInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+}
+func (UnimplementedUserServiceServer) GetBatchUserInfo(context.Context, *GetBatchUserInfoRequest) (*GetBatchUserInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBatchUserInfo not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _UserService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetBatchUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBatchUserInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetBatchUserInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetBatchUserInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetBatchUserInfo(ctx, req.(*GetBatchUserInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserInfo",
 			Handler:    _UserService_GetUserInfo_Handler,
+		},
+		{
+			MethodName: "GetBatchUserInfo",
+			Handler:    _UserService_GetBatchUserInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
