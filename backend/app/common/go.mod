@@ -29,3 +29,9 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+require (
+  github.com/xiaoqixian/v2ex/backend/rpc_gen v0.0.0
+)
+
+replace github.com/xiaoqixian/v2ex/backend/rpc_gen => ../../rpc_gen

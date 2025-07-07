@@ -25,10 +25,11 @@ const (
 type Comment struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CommentId     uint64                 `protobuf:"varint,1,opt,name=comment_id,json=commentId,proto3" json:"comment_id,omitempty"`
-	UserId        uint64                 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserName      string                 `protobuf:"bytes,2,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty"`
 	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
 	Likes         uint32                 `protobuf:"varint,4,opt,name=likes,proto3" json:"likes,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Avatar        string                 `protobuf:"bytes,6,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -70,11 +71,11 @@ func (x *Comment) GetCommentId() uint64 {
 	return 0
 }
 
-func (x *Comment) GetUserId() uint64 {
+func (x *Comment) GetUserName() string {
 	if x != nil {
-		return x.UserId
+		return x.UserName
 	}
-	return 0
+	return ""
 }
 
 func (x *Comment) GetContent() string {
@@ -96,6 +97,13 @@ func (x *Comment) GetCreatedAt() *timestamppb.Timestamp {
 		return x.CreatedAt
 	}
 	return nil
+}
+
+func (x *Comment) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
 }
 
 type AddCommentRequest struct {
@@ -302,15 +310,16 @@ var File_protobuf_comment_proto protoreflect.FileDescriptor
 
 const file_protobuf_comment_proto_rawDesc = "" +
 	"\n" +
-	"\x16protobuf/comment.proto\x12\x04post\x1a\x1fgoogle/protobuf/timestamp.proto\"\xac\x01\n" +
+	"\x16protobuf/comment.proto\x12\x04post\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc8\x01\n" +
 	"\aComment\x12\x1d\n" +
 	"\n" +
-	"comment_id\x18\x01 \x01(\x04R\tcommentId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x04R\x06userId\x12\x18\n" +
+	"comment_id\x18\x01 \x01(\x04R\tcommentId\x12\x1b\n" +
+	"\tuser_name\x18\x02 \x01(\tR\buserName\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12\x14\n" +
 	"\x05likes\x18\x04 \x01(\rR\x05likes\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"_\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
+	"\x06avatar\x18\x06 \x01(\tR\x06avatar\"_\n" +
 	"\x11AddCommentRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x04R\x06userId\x12\x17\n" +
 	"\apost_id\x18\x02 \x01(\x04R\x06postId\x12\x18\n" +

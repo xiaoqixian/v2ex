@@ -14,6 +14,7 @@ import (
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/commentpb"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
@@ -39,23 +40,12 @@ func (impl *CommentServiceImpl) AddComment(
 	in *commentpb.AddCommentRequest,
 ) (*commentpb.AddCommentResponse, error) {
 	// check if user exists
-	userExists := true
-	checkUserExists := func(ctx context.Context, client userpb.UserServiceClient) error {
-		getUserInfoResp, err := client.GetUserInfo(ctx, &userpb.GetUserInfoRequest {
-			UserId: in.UserId,
-			JustCheckExist: true,
-		})
-		if err != nil {
-			return err
-		}
-		userExists = getUserInfoResp.Exist
-		return nil
-	}
-	err := rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, checkUserExists)
+	userExists, err := rpcutil.WithRPCClient2("user-service", ctx, userpb.NewUserServiceClient, 
+		rpcutil.CheckUserExists, uint64(in.UserId))
 	if err != nil {
 		return nil, err
 	}
-	if !userExists {
+	if !userExists.(bool) {
 		return nil, fmt.Errorf("invalid user id %d", in.UserId)
 	}
 
@@ -72,5 +62,51 @@ func (impl *CommentServiceImpl) AddComment(
 	return &commentpb.AddCommentResponse {
 		Success: true,
 		CommentId: uint64(commentID),
+	}, nil
+}
+
+func (impl *CommentServiceImpl) GetComments(
+	ctx context.Context,
+	in *commentpb.GetCommentsReqeust,
+) (*commentpb.GetCommentsResponse, error) {
+	comments, err := model.GetCommentsByPostID(impl.db, ctx, uint(in.PostId))
+	if err != nil {
+		return nil, err
+	}
+	
+	userIDList := make([]uint64, len(comments))
+	for i, c := range comments {
+		userIDList[i] = uint64(c.UserID)
+	}
+	userInfoListResp, err := rpcutil.WithRPCClient2(
+		"user-service",
+		ctx,
+		userpb.NewUserServiceClient,
+		rpcutil.GetBatchUserInfoById,
+		userIDList,
+	)
+	if err != nil {
+		return nil, err
+	}
+	userInfoList := userInfoListResp.(*userpb.GetBatchUserInfoResponse).UserInfoList
+
+	respComments := make([]*commentpb.Comment, 0, len(comments))
+	for i, c := range comments {
+		if !userInfoList[i].Exist {
+			continue
+		}
+
+		respComments = append(respComments, &commentpb.Comment {
+			CommentId: uint64(c.ID),
+			UserName: userInfoList[i].Name,
+			Content: c.Content,
+			Likes: uint32(c.Likes),
+			CreatedAt: timestamppb.New(c.CreatedAt),
+			Avatar: userInfoList[i].Avatar,
+		})
+	}
+
+	return &commentpb.GetCommentsResponse {
+		Comments: respComments,
 	}, nil
 }

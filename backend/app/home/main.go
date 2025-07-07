@@ -7,8 +7,9 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	post_service "github.com/xiaoqixian/v2ex/backend/app/home/service/post"
+	"github.com/xiaoqixian/v2ex/backend/app/home/service/post"
 	"github.com/xiaoqixian/v2ex/backend/app/home/service/user"
+	"github.com/xiaoqixian/v2ex/backend/app/home/service/comment"
 )
 
 func main() {
@@ -30,5 +31,9 @@ func main() {
 	r.GET("/user_posts/:user_id", post_service.GetPostsForUser)
 	r.GET("/posts/:post_id", post_service.GetPost)
 	r.POST("/posts", post_service.PublishPost)
+
+	r.GET("/comments/:post_id", comment_service.GetComments)
+	r.POST("/comments/:post_id", comment_service.SubmitComment)
+
 	r.Run(":8080")
 }

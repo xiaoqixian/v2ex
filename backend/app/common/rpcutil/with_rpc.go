@@ -64,3 +64,32 @@ func WithRPCClient[T any](
 
 	return callback(ctx, newClient(conn))
 }
+
+func WithRPCClient2[T any, A any](
+	serviceName string,
+	ctx context.Context,
+	newClient func(conn grpc.ClientConnInterface) T,
+	callback func(ctx context.Context, client T, data A) (any, error),
+	data A,
+) (any, error) {
+	cli := getConsulClient()
+	services, _, err := cli.Health().Service(serviceName, "", true, nil)
+	
+	if err != nil {
+		return nil, err
+	}
+
+	if len(services) == 0 {
+		return nil, fmt.Errorf("services for '%s' not found", serviceName)
+	}
+	
+	addr := fmt.Sprintf("%s:%d", services[0].Service.Address, services[0].Service.Port)
+
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	return callback(ctx, newClient(conn), data)
+}
