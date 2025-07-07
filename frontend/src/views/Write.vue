@@ -35,8 +35,13 @@
       <div class="footer">
         <select v-model="node">
           <option disabled value="">请选择一个节点</option>
-          <option value="tech">技术</option>
-          <option value="life">生活</option>
+            <option 
+              v-for="(label, key) in nodeTypes" 
+              :key="key" 
+              :value="key"
+            >
+              {{ label }}
+            </option>
         </select>
 
         <button class="submit-btn" @click="submitPost">
@@ -51,6 +56,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+//import Alert from '@/components/Alert.vue'
 import axios from 'axios'
 
 const userStore = useUserStore()
@@ -64,8 +70,21 @@ const syntax = ref('v2ex')
 const submitted = ref(false)
 const postid = ref(null)
 
+const nodeTypes = {
+  "apple": "Apple", 
+  "frontend-dev": "前端开发", 
+  "backend-dev": "后端技术", 
+  "machine-learning": "机器学习", 
+  "game": "游戏", 
+  "life": "生活"
+}
+
 async function submitPost() {
   try {
+    if (node.value == "") {
+      throw new Error("请选择一个节点!")
+    }
+
     const res = await axios.post("/api/posts", {
       userid: userStore.userInfo.id,
       title: title.value,
@@ -76,8 +95,9 @@ async function submitPost() {
     submitted.value = true
     postid.value = res.data.postid
   } catch (err) {
-    console.error("发布失败: ", err)
-    alert("发布失败: ", err.response.data.error)
+    console.error(err)
+    // 在这里抛出一个 alert，内容为 err
+    alert(err)
   }
 }
 
