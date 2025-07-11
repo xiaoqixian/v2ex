@@ -48,11 +48,11 @@
         </article>
       </div>
 
-      <div v-if="userStore.isLoggedIn" class="reply-box">
-        <div class="reply-editor">
-          <div class="reply-title">回复</div>
-          <textarea v-model="myComment" class="reply-textarea" placeholder="写下你的回复..."></textarea>
-          <div class="reply-submit">
+      <div v-if="userStore.isLoggedIn" class="comment-box">
+        <div class="comment-editor">
+          <div class="comment-title">回复</div>
+          <textarea v-model="myComment" class="comment-textarea" placeholder="写下你的回复..."></textarea>
+          <div class="comment-submit">
             <button class="submit-btn" @click="submitComment">提交回复</button>
           </div>
         </div>
@@ -62,23 +62,23 @@
         请<router-link to="/login">登录</router-link>以后再提交回复
       </div>
 
-      <div class="replies">
-        <div class="replies-header">
+      <div class="comments">
+        <div class="comments-header">
           <h2>{{ commentsSize }}条回复</h2>
-          <span class="replies-time">2025-06-20 13:21:34 +08:00</span>
+          <span class="comments-time">2025-06-20 13:21:34 +08:00</span>
         </div>
         
-        <div class="reply" v-for="(reply, index) in replies" :key="index">
-          <div class="reply-left">
-            <img class="reply-avatar" src="@/assets/avatar1.png" :alt="reply.author">
+        <div class="comment" v-for="(comment, index) in comments" :key="index">
+          <div class="comment-left">
+            <img class="comment-avatar" src="@/assets/avatar1.png" :alt="comment.author">
           </div>
-          <div class="reply-right">
-            <div class="reply-header">
-              <span class="reply-author">{{ reply.author }}</span>
-              <span class="reply-time">{{ reply.time }}</span>
-              <span class="reply-floor">{{ index + 1 }}楼</span>
+          <div class="comment-right">
+            <div class="comment-header">
+              <span class="comment-author">{{ comment.user_name }}</span>
+              <span class="comment-time">{{ timeEval(comment.created_at.seconds) }}</span>
+              <span class="comment-floor">{{ index + 1 }}楼</span>
             </div>
-            <div class="reply-content" v-html="reply.content"></div>
+            <div class="comment-content" v-html="comment.content"></div>
           </div>
         </div>
       </div>
@@ -91,25 +91,17 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { useUserStore } from '@/stores/user';
+import { timeEval } from '@/utils/time';
 
 const route = useRoute()
 const userStore = useUserStore()
 
-const title = ref('测试标题')
-const author = ref('测试作者')
+const title = ref('')
+const author = ref('')
 const views = ref(1234)
 const createdAt = ref(1750412014)
 const createTime = computed(() => {
-  const now = Math.floor(Date.now() / 1000)
-  console.log(now)
-  const diff = now - createdAt.value
-
-  if (diff < 60) return '刚刚'
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} 天前`
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} 个月前`
-  return `${Math.floor(diff / 31536000)} 年前`
+  return timeEval(createdAt.value)
 })
 
 const content = ref('')
@@ -136,6 +128,7 @@ async function fetchContent() {
 async function fetchComments() {
   try {
     const res = await axios.get(`/api/comments/${route.params.id}`, {}, { withCredentials: true })
+    console.log(res.data)
     comments.value = res.data
   } catch (err) {
     console.error(err)
@@ -301,11 +294,11 @@ onMounted(() => {
   border-bottom: 1px solid #f0f0f0;
 }
 
-.replies {
+.comments {
   margin-top: 30px;
 }
 
-.replies-header {
+.comments-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -314,67 +307,70 @@ onMounted(() => {
   margin-bottom: 15px;
 }
 
-.replies-header h2 {
+.comments-header h2 {
   font-size: 14px;
   color: #666;
   font-weight: normal;
 }
 
-.replies-time {
+.comments-time {
   font-size: 12px;
   color: #999;
 }
 
-.reply {
+.comment {
   display: flex;
   padding: 15px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.reply-left {
+.comment-left {
   margin-right: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.reply-avatar {
+.comment-avatar {
   width: 36px;
   height: 36px;
   border-radius: 3px;
 }
 
-.reply-right {
+.comment-right {
   flex: 1;
 }
 
-.reply-header {
+.comment-header {
   color: #999;
   font-size: 12px;
   margin-bottom: 8px;
 }
 
-.reply-author {
+.comment-author {
   color: #666;
   font-weight: bold;
   margin-right: 10px;
 }
 
-.reply-floor {
+.comment-floor {
   float: right;
   color: #ccc;
 }
 
-.reply-content {
+.comment-content {
   line-height: 1.7;
   color: #333;
 }
 
-.reply-box {
+.comment-box {
   margin-top: 30px;
   background-color: white;
   border-radius: 3px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.reply-actions {
+.comment-actions {
   display: flex;
   padding: 10px 15px;
   border-bottom: 1px solid #f0f0f0;
@@ -382,7 +378,7 @@ onMounted(() => {
   border-radius: 3px 3px 0 0;
 }
 
-.reply-btn {
+.comment-btn {
   background: none;
   border: 1px solid #ddd;
   padding: 5px 12px;
@@ -394,23 +390,23 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.reply-btn:hover {
+.comment-btn:hover {
   background-color: #f5f5f5;
   border-color: #ccc;
 }
 
-.reply-editor {
+.comment-editor {
   padding: 15px;
 }
 
-.reply-title {
+.comment-title {
   font-size: 14px;
   color: #666;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
-.reply-textarea {
+.comment-textarea {
   width: 100%;
   min-height: 120px;
   padding: 10px;
@@ -423,11 +419,11 @@ onMounted(() => {
   outline: none;
 }
 
-.reply-textarea:focus {
+.comment-textarea:focus {
   border-color: #999;
 }
 
-.reply-submit {
+.comment-submit {
   margin-top: 15px;
   text-align: right;
 }
