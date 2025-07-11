@@ -28,9 +28,9 @@ services:
     container_name: my_consul
     restart: always
     ports:
-      - "8500:8500"     # Consul Web UI
-      - "8600:8600/udp" # DNS
-    command: "agent -dev -client=0.0.0.0"  # 以开发模式运行，允许外部访问
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: "agent -dev -client=0.0.0.0"
 
   kafka:
     image: bitnami/kafka:latest
