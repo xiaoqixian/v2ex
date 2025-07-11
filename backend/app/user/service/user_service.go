@@ -100,12 +100,8 @@ func (impl *UserServiceImpl) Login(
 		}, nil
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHashed), []byte(in.Password))
 	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	
-	if string(hashedPassword) != user.PasswordHashed {
 		return &userpb.LoginResponse {
 			Success: false,
 			Message: "密码错误",
