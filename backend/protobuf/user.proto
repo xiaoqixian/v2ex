@@ -23,35 +23,12 @@ message LoginRequest {
 message LoginResponse {
   bool success = 1;
   string message = 2;
-  string access_token = 3;
-  string refresh_token = 4;
-  int64 access_expires_in = 5; // in seconds
-  int64 refresh_expires_in = 6; // in seconds
 
   message User {
     uint64 id = 1;
   }
 
-  User user = 7;
-}
-
-message RefreshTokenRequest {
-  string refresh_token = 1;
-}
-
-message RefreshTokenResponse {
-  string access_token = 1;
-  int64 expires_in = 2; // in minutes
-  string token_type = 3;
-}
-
-message AuthMeRequest {
-  string access_token = 1;
-}
-
-message AuthMeResponse {
-  bool success = 1;
-  uint64 user_id = 2;
+  User user = 3;
 }
 
 message GetUserInfoRequest {
@@ -74,8 +51,6 @@ message GetBatchUserInfoResponse {
 service UserService {
   rpc Register     (RegisterRequest)     returns (RegisterResponse);
   rpc Login        (LoginRequest)        returns (LoginResponse);
-  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
-  rpc AuthMe (AuthMeRequest) returns (AuthMeResponse);
 
   rpc GetUserInfo (GetUserInfoRequest) returns (GetUserInfoResponse);
   rpc GetBatchUserInfo (GetBatchUserInfoRequest) returns (GetBatchUserInfoResponse);
