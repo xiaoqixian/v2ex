@@ -7,18 +7,37 @@ package post_service
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
-	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
+func getPostCallback(
+	ctx context.Context, 
+	client postpb.PostServiceClient,
+	req *postpb.GetPostRequest,
+) (any, error) {
+	resp, err := client.GetPost(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if e, ok := resp.Result.(*postpb.GetPostResponse_Err); ok {
+		return nil, fmt.Errorf("rpc GetPost failed: %s", e.Err.Message)
+	}
+
+	o, _ := resp.Result.(*postpb.GetPostResponse_Ok)
+	return o.Ok, nil
+}
+
+
 func GetPost(ginCtx *gin.Context) {
-	postID, err := strconv.Atoi(ginCtx.Param("post_id"))
+	postid, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H {
 			"error": fmt.Sprintf("Invalid post_id: %s", ginCtx.Param("post_id")),
@@ -26,45 +45,30 @@ func GetPost(ginCtx *gin.Context) {
 		return
 	}
 
-	var userID uint
+	var userid uint64
 	accessToken, err := ginCtx.Cookie("access_token")
-	log.Println("access_token detected in cookie, get post with user id")
+
 	if err == nil {
-		parse := func(ctx context.Context, client userpb.UserServiceClient) error {
-			resp, err2 := client.AuthMe(ctx, &userpb.AuthMeRequest {
-				AccessToken: accessToken,
-			})
-			if err2 == nil && resp.Success {
-				userID = uint(resp.UserId)
-			}
-			return nil
-		}
-		rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, parse)
+		userid, _ = util.ParseToken(accessToken)
 	}
 
-	callback := func(ctx context.Context, client postpb.PostServiceClient) error {
-		resp, err2 := client.GetPost(ctx, &postpb.GetPostRequest {
-			PostId: uint64(postID),
-			UserId: uint64(userID),
-		})
-		if err2 != nil {
-			return err2
-		}
-
-		if e, ok := resp.Result.(*postpb.GetPostResponse_Err); ok {
-			return fmt.Errorf("rpc GetPost failed: %s", e.Err.Message)
-		}
-
-		o, _ := resp.Result.(*postpb.GetPostResponse_Ok)
-		ginCtx.JSON(http.StatusOK, o.Ok)
-		return nil
+	req := postpb.GetPostRequest {
+		PostId: postid,
+		UserId: userid,
 	}
 
-	err = rpcutil.WithRPCClient("post-service", postpb.NewPostServiceClient, callback)
-
+	conf := conf.GetConf()
+	resp, err := rpcutil.NewBuilder(&req, postpb.NewPostServiceClient).
+		WithService(conf.Consul.Post).
+		WithCallback(getPostCallback).
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
 	if err != nil {
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": err.Error(),
 		})
+		return
 	}
+	
+	ginCtx.JSON(http.StatusOK, resp)
 }

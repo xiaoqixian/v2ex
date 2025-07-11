@@ -5,24 +5,19 @@
 package comment_service
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/commentpb"
 )
 
-func submitComment(ctx context.Context, client commentpb.CommentServiceClient, req *commentpb.AddCommentRequest) (any, error) {
-	return client.AddComment(ctx, req)
-}
-
 func SubmitComment(ginCtx *gin.Context) {
-	postID, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
+	postid, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H {
 			"error": fmt.Sprintf("Invalid post_id: %s", ginCtx.Param("post_id")),
@@ -31,7 +26,7 @@ func SubmitComment(ginCtx *gin.Context) {
 	}
 
 	req := commentpb.AddCommentRequest {
-		PostId: postID,
+		PostId: postid,
 	}
 
 	if err = ginCtx.ShouldBindJSON(&req); err != nil {
@@ -41,26 +36,24 @@ func SubmitComment(ginCtx *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	respAny, err := rpcutil.WithRPCClient2(
-		"comment-service",
-		ctx,
-		commentpb.NewCommentServiceClient,
-		submitComment,
-		&req,
-	)
+	conf := conf.GetConf()
+	respAny, err := rpcutil.NewBuilder(&req, commentpb.NewCommentServiceClient).
+		WithService(conf.Consul.Comment).
+		WithMethod("AddComment").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
 	if err != nil {
-		log.Println(err.Error()) 
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": err.Error(),
 		})
 		return
 	}
-	resp := respAny.(*commentpb.AddCommentResponse)
-	if !resp.Success {
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": "未知错误",
+	
+	resp, ok := respAny.(*commentpb.AddCommentResponse)
+	if !ok {
+		log.Printf("[SubmitComment] Expect *commentpb.GetCommentsResponse, got '%T'\n", respAny)
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"error": "内部错误，稍后再试",
 		})
 		return
 	}

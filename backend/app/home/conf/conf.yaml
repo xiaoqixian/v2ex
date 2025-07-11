@@ -1,0 +1,16 @@
+jwt:
+  secret: "oJQFLx8O+jq7t3lgktV5CrvORkTUellZzhzptMht7dY="
+  # refresh token expiration time, in seconds
+  refexptime: 86400
+  # access token expiration time, in seconds
+  accexptime: 900
+
+rpc:
+  # rpc timeout, in ms
+  rpctimeout: 2000
+
+# the service names for the corresponding consul service
+consul:
+  user: "user-service"
+  post: "post-service"
+  comment: "comment-service"

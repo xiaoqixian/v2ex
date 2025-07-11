@@ -5,54 +5,42 @@
 package user_service
 
 import (
-	"context"
-	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
-	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 )
 
-type RefreshTokenArgs struct {
-	Token string `json:"refresh_token" binding:"required"`
-}
-
 func RefreshToken(ginCtx *gin.Context) {
-	var args RefreshTokenArgs
-	if err := ginCtx.ShouldBindJSON(&args); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H {
-			"error": fmt.Sprintf("JSON bind error: %s", err.Error()),
+	token, err := ginCtx.Cookie("refresh_token")
+	if err != nil {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H {})
+		log.Printf("Get 'refresh_token' cookie error: %s\n", err.Error())
+		return
+	}
+
+	userid, err := CheckUser(token)
+	if err != nil {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H {
+			"error": err.Error(),
+		})
+		return
+	}
+	
+	conf := conf.GetConf()
+	accessToken, err := util.GenerateToken(userid, time.Duration(conf.JWT.AccExpTime) * time.Second)
+	if err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"error": err.Error(),
 		})
 		return
 	}
 
-	req := userpb.RefreshTokenRequest {
-		RefreshToken: args.Token,
-	}
-
-	callback := func(ctx context.Context, client userpb.UserServiceClient) error {
-		resp, err2 := client.RefreshToken(ctx, &req)
-		if err2 != nil {
-			return err2
-		}
-		if resp.AccessToken == "" {
-			return fmt.Errorf("RefreshToken expired")
-		}
-
-		ginCtx.JSON(http.StatusOK, gin.H {
-			"access_token": resp.AccessToken,
-			"expires_in": resp.ExpiresIn,
-			"token_type": resp.TokenType,
-		})
-		return nil
-	}
-
-	err := rpcutil.WithRPCClient("user-service", userpb.NewUserServiceClient, callback)
-
-	if err != nil {
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			"error": err.Error(),
-		})
-	}
+	ginCtx.JSON(http.StatusOK, gin.H {
+		"access_token": accessToken,
+		"expires_in": conf.JWT.AccExpTime,
+	})
 }

@@ -5,11 +5,13 @@
 package post_service
 
 import (
-	"context"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
+	user_service "github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 )
 
@@ -20,24 +22,45 @@ func PublishPost(ginCtx *gin.Context) {
 		return
 	}
 
-	callback := func(ctx context.Context, client postpb.PostServiceClient) error {
-		resp, err2 := client.PublishPost(ctx, &req)
-		if err2 != nil {
-			return err2
-		}
-
-		ginCtx.JSON(http.StatusOK, gin.H {
-			"message": resp.Message,
-			"postid": resp.PostId,
+	accessToken, err := ginCtx.Cookie("access_token")
+	if err != nil {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H {
+			"error": "登录信息已失效，请重新登录",
 		})
-		return nil
+		return
+	}
+	req.UserId, err = user_service.CheckUser(accessToken)
+	if err != nil {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H {
+			"error": "登录信息已失效，请重新登录",
+		})
+		return
 	}
 
-	err := rpcutil.WithRPCClient("post-service", postpb.NewPostServiceClient, callback)
-
+	conf := conf.GetConf()
+	respAny, err := rpcutil.NewBuilder(&req, postpb.NewPostServiceClient).
+		WithService(conf.Consul.Post).
+		WithMethod("PublishPost").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
 	if err != nil {
-		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
 			"error": err.Error(),
 		})
+		return
 	}
+
+	resp, ok := respAny.(*postpb.PublishPostResponse)
+	if !ok {
+		log.Printf("[PublishPost] Expect *postpb.PublishPostResponse, got '%T'\n", respAny)
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"error": "内部错误，稍后再试",
+		})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, gin.H {
+		"message": resp.Message,
+		"postid": resp.PostId,
+	})
 }

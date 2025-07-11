@@ -5,30 +5,19 @@
 package comment_service
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/commentpb"
 )
 
-func getComments(ctx context.Context, client commentpb.CommentServiceClient, postID uint64) (any, error) {
-	resp, err := client.GetComments(ctx, &commentpb.GetCommentsReqeust {
-		PostId: postID,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp.Comments, nil
-}
-
 func GetComments(ginCtx *gin.Context) {
-	postID, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
+	postid, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H {
 			"error": fmt.Sprintf("Invalid post_id: %s", ginCtx.Param("post_id")),
@@ -36,29 +25,31 @@ func GetComments(ginCtx *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	commentsAny, err := rpcutil.WithRPCClient2(
-		"comment-service",
-		ctx,
-		commentpb.NewCommentServiceClient,
-		getComments,
-		postID,
-	)
-	if err != nil {
-		 log.Println(err.Error()) 
-		 ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			 "error": err.Error(),
-		 })
+	req := commentpb.GetCommentsReqeust {
+		PostId: postid,
 	}
 
-	comments, ok := commentsAny.(*[]commentpb.Comment)
-	if !ok {
-		 log.Panicln("Unexpected commentsAny") 
-		 ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
-			 "error": "未知错误，无法获取评论",
-		 })
+	conf := conf.GetConf()
+	respAny, err := rpcutil.NewBuilder(&req, commentpb.NewCommentServiceClient).
+		WithService(conf.Consul.Comment).
+		WithMethod("GetComments").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
+	if err != nil {
+		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
+			"error": err.Error(),
+		})
+		return
 	}
 	
-	ginCtx.JSON(http.StatusOK, comments)
+	resp, ok := respAny.(*commentpb.GetCommentsResponse)
+	if !ok {
+		log.Printf("[GetComments] Expect *commentpb.GetCommentsResponse, got '%T'\n", respAny)
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"error": "内部错误，稍后再试",
+		})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, resp.Comments)
 }
