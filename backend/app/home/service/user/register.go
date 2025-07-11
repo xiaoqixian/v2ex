@@ -40,7 +40,7 @@ func RegisterUser(ginCtx *gin.Context) {
 		return
 	}
 
-	resp, ok := respAny.(*userpb.LoginResponse)
+	resp, ok := respAny.(*userpb.RegisterResponse)
 	if !ok {
 		log.Printf("respAny convert to *userpb.LoginResponse failed, actual type is '%T'\n", respAny)
 		ginCtx.JSON(http.StatusInternalServerError, gin.H {
