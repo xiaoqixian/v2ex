@@ -8,11 +8,18 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sync"
 	"time"
 
+	consul "github.com/hashicorp/consul/api"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+)
+
+var (
+  consulClient *consul.Client
+  once         sync.Once
 )
 
 // A for user data, C for client
@@ -52,6 +59,9 @@ func (b *Builder[A, C]) WithMsTimeout(d int) *Builder[A, C] {
 }
 
 func (b *Builder[A, C]) WithTimeout(d time.Duration) *Builder[A, C] {
+	if b.ctx == nil {
+		b.ctx = context.Background()
+	}
 	b.ctx, b.cancel = context.WithTimeout(b.ctx, d)
 	return b
 }
@@ -116,4 +126,18 @@ func (b *Builder[A, C]) Call() (any, error) {
 	defer conn.Close()
 	
 	return b.callback(b.ctx, b.newClientFunc(conn), b.data)
+}
+
+func getConsulClient() *consul.Client {
+  once.Do(func() {
+    config := consul.DefaultConfig()
+    config.Address = "127.0.0.1:8500"
+
+    var err error
+    consulClient, err = consul.NewClient(config)
+    if err != nil {
+      log.Fatalf("failed to create consul client: %v", err)
+    }
+  })
+  return consulClient
 }

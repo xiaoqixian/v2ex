@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/xiaoqixian/v2ex/backend/app/comment/conf"
 	"github.com/xiaoqixian/v2ex/backend/app/comment/dal"
 	"github.com/xiaoqixian/v2ex/backend/app/comment/model"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
@@ -40,12 +41,26 @@ func (impl *CommentServiceImpl) AddComment(
 	in *commentpb.AddCommentRequest,
 ) (*commentpb.AddCommentResponse, error) {
 	// check if user exists
-	userExists, err := rpcutil.WithRPCClient2("user-service", ctx, userpb.NewUserServiceClient, 
-		rpcutil.CheckUserExists, uint64(in.UserId))
+	getUserInfoReq := userpb.GetUserInfoRequest {
+		UserId: in.UserId,
+		JustCheckExist: true,
+	}
+	conf := conf.GetConf()
+	getUserInfoRespAny, err := rpcutil.NewBuilder(&getUserInfoReq, userpb.NewUserServiceClient).
+		WithService(conf.Consul.User).
+		WithMethod("GetUserInfo").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
+
 	if err != nil {
 		return nil, err
 	}
-	if !userExists.(bool) {
+	getUserInfoResp, ok := getUserInfoRespAny.(*userpb.GetUserInfoResponse)
+	if !ok {
+		return nil, fmt.Errorf("RPC error: expect response type '*userpb.GetUserInfoResponse', got '%T'", getUserInfoRespAny)
+	}
+
+	if !getUserInfoResp.Exist {
 		return nil, fmt.Errorf("invalid user id %d", in.UserId)
 	}
 
@@ -78,17 +93,26 @@ func (impl *CommentServiceImpl) GetComments(
 	for i, c := range comments {
 		userIDList[i] = uint64(c.UserID)
 	}
-	userInfoListResp, err := rpcutil.WithRPCClient2(
-		"user-service",
-		ctx,
-		userpb.NewUserServiceClient,
-		rpcutil.GetBatchUserInfoById,
-		userIDList,
-	)
+	getBatchUserInfoReq := userpb.GetBatchUserInfoRequest {
+		UserIdList: userIDList,
+	}
+
+	conf := conf.GetConf()
+	userInfoListAny, err := rpcutil.NewBuilder(&getBatchUserInfoReq, userpb.NewUserServiceClient).
+		WithService(conf.Consul.User).
+		WithMethod("GetBatchUserInfo").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
 	if err != nil {
 		return nil, err
 	}
-	userInfoList := userInfoListResp.(*userpb.GetBatchUserInfoResponse).UserInfoList
+
+	userInfoListResp, ok := userInfoListAny.(*userpb.GetBatchUserInfoResponse)
+	if !ok {
+		return nil, fmt.Errorf("[GetComments] expect type '*userpb.GetBatchUserInfoResponse', got '%T'", userInfoListAny)
+	}
+
+	userInfoList := userInfoListResp.UserInfoList
 
 	respComments := make([]*commentpb.Comment, 0, len(comments))
 	for i, c := range comments {

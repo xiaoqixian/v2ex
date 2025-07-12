@@ -34,10 +34,22 @@ type KafkaConfig struct {
 	Topic   string   `yaml:"topic"`
 }
 
+type ConsulConfig struct {
+	User    string `yaml:"user"`
+	Post    string `yaml:"post"`
+	Comment string `yaml:"comment"`
+}
+
+type RpcConfig struct {
+	RpcTimeout int `yaml:"rpctimeout"`
+}
+
 type Config struct {
-	MySQL MySQLConfig
-	Redis RedisConfig
-	Kafka KafkaConfig
+	MySQL  MySQLConfig
+	Redis  RedisConfig
+	Kafka  KafkaConfig
+	Consul ConsulConfig
+	Rpc    RpcConfig
 }
 
 var(

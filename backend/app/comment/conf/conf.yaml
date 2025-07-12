@@ -17,3 +17,12 @@ kafka:
   brokers:
     - localhost:9092
   topic: v2ex-post-activity
+
+consul:
+  user: "user-service"
+  post: "post-service"
+  comment: "comment-service"
+
+rpc:
+  # rpc timeout, in ms
+  rpctimeout: 2000
