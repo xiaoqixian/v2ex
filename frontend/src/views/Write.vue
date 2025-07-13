@@ -18,17 +18,6 @@
       </div>
 
       <div class="editor-body">
-        <div class="tabs">
-          <button :class="{ active: tab === 'text' }" @click="tab = 'text'">正文</button>
-          <button :class="{ active: tab === 'preview' }" @click="tab = 'preview'">预览</button>
-        </div>
-
-        <div class="syntax-selector">
-          <span>Syntax</span>
-          <button :class="{ active: syntax === 'v2ex' }" @click="syntax = 'v2ex'">V2EX 原生格式</button>
-          <button :class="{ active: syntax === 'markdown' }" @click="syntax = 'markdown'">Markdown</button>
-        </div>
-
         <textarea v-model="content" class="editor-textarea" rows="15"></textarea>
       </div>
 
@@ -86,7 +75,6 @@ async function submitPost() {
     }
 
     const res = await axios.post("/api/posts", {
-      userid: userStore.userInfo.id,
       title: title.value,
       node: node.value,
       content: content.value
@@ -141,8 +129,7 @@ function resetForm() {
   padding: 10px;
   font-size: 16px;
   box-sizing: border-box;
-  border: none;
-  border-bottom: 1px solid #ccc;
+  border: 1px solid #ccc;
 }
 
 .editor-body {

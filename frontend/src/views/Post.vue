@@ -70,7 +70,7 @@
         
         <div class="comment" v-for="(comment, index) in comments" :key="index">
           <div class="comment-left">
-            <img class="comment-avatar" src="@/assets/avatar1.png" :alt="comment.author">
+            <img class="comment-avatar" src="@/assets/default_avatar.png" :alt="comment.author">
           </div>
           <div class="comment-right">
             <div class="comment-header">
@@ -149,6 +149,7 @@ async function submitComment() {
       withCredentials: true
     })
 
+    myComment.value = ""
     await fetchComments()
   } catch (err) {
     console.error(err)

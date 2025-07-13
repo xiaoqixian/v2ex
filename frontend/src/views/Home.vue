@@ -23,13 +23,10 @@ import Sidebar from '@/components/Sidebar.vue';
 import TabNav from '@/components/TabNav.vue';
 import { themes, defaultTheme } from '@/themes.js';
 
-// 主题状态管理
 const currentTheme = ref(localStorage.getItem('theme') || defaultTheme);
 
-// 当前选中的分类
 const selectedCategory = ref('技术');
 
-// 提供给所有组件使用的主题相关函数和状态
 provide('theme', {
   current: currentTheme,
   themes,
@@ -40,7 +37,6 @@ provide('theme', {
   }
 });
 
-// 应用主题到CSS变量
 const applyTheme = (themeName) => {
   const theme = themes[themeName];
   if (!theme) return;
@@ -51,12 +47,10 @@ const applyTheme = (themeName) => {
   });
 };
 
-// 监听主题变化
 watch(currentTheme, (newTheme) => {
   applyTheme(newTheme);
 });
 
-// 初始化主题
 onMounted(() => {
   applyTheme(currentTheme.value);
 });
