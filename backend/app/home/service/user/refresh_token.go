@@ -39,8 +39,16 @@ func RefreshToken(ginCtx *gin.Context) {
 		return
 	}
 
+	ginCtx.SetCookie(
+		"access_token",
+		accessToken,
+		conf.JWT.AccExpTime,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
 	ginCtx.JSON(http.StatusOK, gin.H {
-		"access_token": accessToken,
 		"expires_in": conf.JWT.AccExpTime,
 	})
 }
