@@ -397,32 +397,31 @@ func (*GetPostResponse_Ok) isGetPostResponse_Result() {}
 
 func (*GetPostResponse_Err) isGetPostResponse_Result() {}
 
-type Post struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// TODO: add author_name field
-	AuthorId      uint64                 `protobuf:"varint,1,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+type PostEntry struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PostId        uint64                 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+	AuthorId      uint64                 `protobuf:"varint,2,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
 	Node          string                 `protobuf:"bytes,4,opt,name=node,proto3" json:"node,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Post) Reset() {
-	*x = Post{}
+func (x *PostEntry) Reset() {
+	*x = PostEntry{}
 	mi := &file_protobuf_post_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Post) String() string {
+func (x *PostEntry) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Post) ProtoMessage() {}
+func (*PostEntry) ProtoMessage() {}
 
-func (x *Post) ProtoReflect() protoreflect.Message {
+func (x *PostEntry) ProtoReflect() protoreflect.Message {
 	mi := &file_protobuf_post_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -434,40 +433,40 @@ func (x *Post) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Post.ProtoReflect.Descriptor instead.
-func (*Post) Descriptor() ([]byte, []int) {
+// Deprecated: Use PostEntry.ProtoReflect.Descriptor instead.
+func (*PostEntry) Descriptor() ([]byte, []int) {
 	return file_protobuf_post_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Post) GetAuthorId() uint64 {
+func (x *PostEntry) GetPostId() uint64 {
+	if x != nil {
+		return x.PostId
+	}
+	return 0
+}
+
+func (x *PostEntry) GetAuthorId() uint64 {
 	if x != nil {
 		return x.AuthorId
 	}
 	return 0
 }
 
-func (x *Post) GetTitle() string {
+func (x *PostEntry) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *Post) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
-func (x *Post) GetNode() string {
+func (x *PostEntry) GetNode() string {
 	if x != nil {
 		return x.Node
 	}
 	return ""
 }
 
-func (x *Post) GetCreatedAt() *timestamppb.Timestamp {
+func (x *PostEntry) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
@@ -521,7 +520,7 @@ func (x *GetPostsForUserRequest) GetUserId() uint64 {
 type GetPostsForUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Posts         []*Post                `protobuf:"bytes,2,rep,name=posts,proto3" json:"posts,omitempty"`
+	Posts         []*PostEntry           `protobuf:"bytes,2,rep,name=posts,proto3" json:"posts,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -563,7 +562,7 @@ func (x *GetPostsForUserResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *GetPostsForUserResponse) GetPosts() []*Post {
+func (x *GetPostsForUserResponse) GetPosts() []*PostEntry {
 	if x != nil {
 		return x.Posts
 	}
@@ -598,20 +597,19 @@ const file_protobuf_post_proto_rawDesc = "" +
 	"\x0fGetPostResponse\x12)\n" +
 	"\x02ok\x18\x01 \x01(\v2\x17.post.GetPostOkResponseH\x00R\x02ok\x12,\n" +
 	"\x03err\x18\x02 \x01(\v2\x18.post.GetPostErrResponseH\x00R\x03errB\b\n" +
-	"\x06result\"\xa2\x01\n" +
-	"\x04Post\x12\x1b\n" +
-	"\tauthor_id\x18\x01 \x01(\x04R\bauthorId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
-	"\acontent\x18\x03 \x01(\tR\acontent\x12\x12\n" +
+	"\x06result\"\xa6\x01\n" +
+	"\tPostEntry\x12\x17\n" +
+	"\apost_id\x18\x01 \x01(\x04R\x06postId\x12\x1b\n" +
+	"\tauthor_id\x18\x02 \x01(\x04R\bauthorId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12\x12\n" +
 	"\x04node\x18\x04 \x01(\tR\x04node\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"1\n" +
 	"\x16GetPostsForUserRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x04R\x06userId\"U\n" +
+	"\auser_id\x18\x01 \x01(\x04R\x06userId\"Z\n" +
 	"\x17GetPostsForUserResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12 \n" +
-	"\x05posts\x18\x02 \x03(\v2\n" +
-	".post.PostR\x05posts2\xd9\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12%\n" +
+	"\x05posts\x18\x02 \x03(\v2\x0f.post.PostEntryR\x05posts2\xd9\x01\n" +
 	"\vPostService\x12B\n" +
 	"\vPublishPost\x12\x18.post.PublishPostRequest\x1a\x19.post.PublishPostResponse\x12N\n" +
 	"\x0fGetPostsForUser\x12\x1c.post.GetPostsForUserRequest\x1a\x1d.post.GetPostsForUserResponse\x126\n" +
@@ -637,7 +635,7 @@ var file_protobuf_post_proto_goTypes = []any{
 	(*GetPostOkResponse)(nil),       // 3: post.GetPostOkResponse
 	(*GetPostErrResponse)(nil),      // 4: post.GetPostErrResponse
 	(*GetPostResponse)(nil),         // 5: post.GetPostResponse
-	(*Post)(nil),                    // 6: post.Post
+	(*PostEntry)(nil),               // 6: post.PostEntry
 	(*GetPostsForUserRequest)(nil),  // 7: post.GetPostsForUserRequest
 	(*GetPostsForUserResponse)(nil), // 8: post.GetPostsForUserResponse
 	(*timestamppb.Timestamp)(nil),   // 9: google.protobuf.Timestamp
@@ -646,8 +644,8 @@ var file_protobuf_post_proto_depIdxs = []int32{
 	9, // 0: post.GetPostOkResponse.created_at:type_name -> google.protobuf.Timestamp
 	3, // 1: post.GetPostResponse.ok:type_name -> post.GetPostOkResponse
 	4, // 2: post.GetPostResponse.err:type_name -> post.GetPostErrResponse
-	9, // 3: post.Post.created_at:type_name -> google.protobuf.Timestamp
-	6, // 4: post.GetPostsForUserResponse.posts:type_name -> post.Post
+	9, // 3: post.PostEntry.created_at:type_name -> google.protobuf.Timestamp
+	6, // 4: post.GetPostsForUserResponse.posts:type_name -> post.PostEntry
 	0, // 5: post.PostService.PublishPost:input_type -> post.PublishPostRequest
 	7, // 6: post.PostService.GetPostsForUser:input_type -> post.GetPostsForUserRequest
 	2, // 7: post.PostService.GetPost:input_type -> post.GetPostRequest
