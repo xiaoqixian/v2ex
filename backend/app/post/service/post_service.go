@@ -124,21 +124,22 @@ func (impl *PostServiceImpl) GetPostsForUser(
 	//TODO: customized user posts recommendations
 	const N = 20
 	var posts []model.Post
-	err := impl.db.Order("created_at DESC").Limit(N).Find(&posts).Error
+	err := impl.db.Select("id, created_at, user_id, title, node").
+		Order("created_at DESC").Limit(N).Find(&posts).Error
 
 	if err != nil {
 		return nil, err
 	}
 
 	size := len(posts)
-	respPosts := make([]*postpb.Post, size)
-	for i := size - 1; i >= 0; i-- {
-		respPosts[size-i] = &postpb.Post {
-			AuthorId: posts[i].UserID,
-			Title: posts[i].Title,
-			Content: posts[i].Content,
-			Node: posts[i].Node,
-			CreatedAt: timestamppb.New(posts[i].CreatedAt),
+	respPosts := make([]*postpb.PostEntry, size)
+	for i, p := range posts {
+		respPosts[i] = &postpb.PostEntry {
+			PostId: uint64(p.ID),
+			AuthorId: p.UserID,
+			Title: p.Title,
+			Node: p.Node,
+			CreatedAt: timestamppb.New(p.CreatedAt),
 		}
 	}
 
