@@ -3,6 +3,7 @@ module github.com/xiaoqixian/v2ex/backend/app/home
 go 1.24.3
 
 require github.com/xiaoqixian/v2ex/backend/rpc_gen v0.0.0
+require github.com/xiaoqixian/v2ex/backend/app/common v0.0.0
 
 require (
 	github.com/bytedance/sonic v1.13.2 // indirect
@@ -38,3 +39,4 @@ require (
 )
 
 replace github.com/xiaoqixian/v2ex/backend/rpc_gen => ../../rpc_gen
+replace github.com/xiaoqixian/v2ex/backend/app/common => ../common
