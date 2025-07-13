@@ -11,31 +11,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
-	user_service "github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
 )
 
 func PublishPost(ginCtx *gin.Context) {
 	var req postpb.PublishPostRequest
 	if err := ginCtx.ShouldBindJSON(&req); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H {})
+		ginCtx.JSON(http.StatusBadRequest, gin.H {
+			"error": err.Error(),
+		})
 		return
 	}
 
-	accessToken, err := ginCtx.Cookie("access_token")
-	if err != nil {
+	userid, exists := ginCtx.Get("userid")
+	if !exists {
 		ginCtx.JSON(http.StatusUnauthorized, gin.H {
 			"error": "登录信息已失效，请重新登录",
 		})
 		return
 	}
-	req.UserId, err = user_service.CheckUser(accessToken)
-	if err != nil {
-		ginCtx.JSON(http.StatusUnauthorized, gin.H {
-			"error": "登录信息已失效，请重新登录",
-		})
-		return
-	}
+	req.UserId = userid.(uint64)
 
 	conf := conf.GetConf()
 	respAny, err := rpcutil.NewBuilder(&req, postpb.NewPostServiceClient).
