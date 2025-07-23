@@ -57,33 +57,18 @@ func (impl *PostServiceImpl) GetPost(
 	}
 	if post == nil {
 		return &postpb.GetPostResponse {
-			Result: &postpb.GetPostResponse_Err {
-				Err: &postpb.GetPostErrResponse {
-					Message: "Post not found",
-				},
-			},
+			Found: false,
 		}, nil
 	}
 
-	// Write ViewPost message to kafka mq
-	if in.UserId != 0 {
-		log.Printf("write view post message to kafka\n")
-		err = impl.writeViewPostMsg(ctx, post.ID, uint(in.UserId))
-		if err != nil {
-			log.Printf("Write kafka error: %s\n", err.Error())
-		}
-	}
-
 	return &postpb.GetPostResponse {
-		Result: &postpb.GetPostResponse_Ok {
-			Ok: &postpb.GetPostOkResponse {
-				Title: post.Title,
-				Author: "Unknown", //TODO: Get author name by user id
-				Node: post.Node,
-				Content: post.Content,
-				CreatedAt: timestamppb.New(post.CreatedAt),
-			},
-		},
+		Found: true,
+		PostId: uint64(post.ID),
+		Title: post.Title,
+		AuthorId: post.UserID,
+		Node: post.Node,
+		CreatedAt: timestamppb.New(post.CreatedAt),
+		Content: post.Content,
 	}, nil
 }
 

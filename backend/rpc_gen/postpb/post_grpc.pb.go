@@ -22,6 +22,7 @@ const (
 	PostService_PublishPost_FullMethodName     = "/post.PostService/PublishPost"
 	PostService_GetPostsForUser_FullMethodName = "/post.PostService/GetPostsForUser"
 	PostService_GetPost_FullMethodName         = "/post.PostService/GetPost"
+	PostService_AddPostView_FullMethodName     = "/post.PostService/AddPostView"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -31,6 +32,7 @@ type PostServiceClient interface {
 	PublishPost(ctx context.Context, in *PublishPostRequest, opts ...grpc.CallOption) (*PublishPostResponse, error)
 	GetPostsForUser(ctx context.Context, in *GetPostsForUserRequest, opts ...grpc.CallOption) (*GetPostsForUserResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
+	AddPostView(ctx context.Context, in *AddPostViewRequest, opts ...grpc.CallOption) (*AddPostViewResponse, error)
 }
 
 type postServiceClient struct {
@@ -71,6 +73,16 @@ func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opt
 	return out, nil
 }
 
+func (c *postServiceClient) AddPostView(ctx context.Context, in *AddPostViewRequest, opts ...grpc.CallOption) (*AddPostViewResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddPostViewResponse)
+	err := c.cc.Invoke(ctx, PostService_AddPostView_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type PostServiceServer interface {
 	PublishPost(context.Context, *PublishPostRequest) (*PublishPostResponse, error)
 	GetPostsForUser(context.Context, *GetPostsForUserRequest) (*GetPostsForUserResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
+	AddPostView(context.Context, *AddPostViewRequest) (*AddPostViewResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedPostServiceServer) GetPostsForUser(context.Context, *GetPosts
 }
 func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
+}
+func (UnimplementedPostServiceServer) AddPostView(context.Context, *AddPostViewRequest) (*AddPostViewResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddPostView not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 func (UnimplementedPostServiceServer) testEmbeddedByValue()                     {}
@@ -172,6 +188,24 @@ func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_AddPostView_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddPostViewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).AddPostView(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_AddPostView_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).AddPostView(ctx, req.(*AddPostViewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPost",
 			Handler:    _PostService_GetPost_Handler,
+		},
+		{
+			MethodName: "AddPostView",
+			Handler:    _PostService_AddPostView_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

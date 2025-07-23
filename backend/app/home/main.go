@@ -25,9 +25,9 @@ func main() {
 	}))
 
 	r.POST("/register", user_service.RegisterUser)
-	r.POST("/login", mid.JWTGen(), user_service.UserLogin)
-	r.POST("/auth/refresh", user_service.RefreshToken)
-	r.GET("/auth/me", user_service.AuthMe)
+	r.POST("/login", user_service.UserLogin)
+	r.POST("/auth/refresh", mid.JWTGenAccess(), user_service.AuthMe)
+	r.GET("/auth/me", mid.JWTGenAccess(), user_service.AuthMe)
 
 	r.GET("/home_posts", mid.JWTParse(), post_service.GetPostsForUser)
 	r.GET("/posts/:post_id", mid.JWTParse(), post_service.GetPost)

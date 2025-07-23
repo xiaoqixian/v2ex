@@ -52,7 +52,7 @@ func JWTAuth() gin.HandlerFunc {
 	}
 }
 
-func JWTGen() gin.HandlerFunc {
+func JWTGenAccess() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ctx.Next()
 		if ctx.Writer.Status() != http.StatusOK {
@@ -70,25 +70,11 @@ func JWTGen() gin.HandlerFunc {
 			log.Printf("[Middleware JWTGen] generate accessToken failed: %s\n", err.Error())
 			return
 		}
-		refreshToken, err := util.GenerateToken(userid.(uint64), time.Duration(conf.JWT.RefExpTime) * time.Second)
-		if err != nil {
-			log.Printf("[Middleware JWTGen] generate refreshToken failed: %s\n", err.Error())
-			return
-		}
 
 		ctx.SetCookie(
 			"access_token",
 			accessToken,
 			conf.JWT.AccExpTime,
-			"/",
-			"localhost",
-			false,
-			true,
-		)
-		ctx.SetCookie(
-			"refresh_token",
-			refreshToken,
-			conf.JWT.RefExpTime,
 			"/",
 			"localhost",
 			false,

@@ -7,10 +7,12 @@ package user_service
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
@@ -54,10 +56,38 @@ func UserLogin(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.Set("userid", resp.User.Id)
+	accessToken, err := util.GenerateToken(resp.User.Id, time.Duration(conf.JWT.AccExpTime) * time.Second)
+	refreshToken, err2 := util.GenerateToken(resp.User.Id, time.Duration(conf.JWT.RefExpTime) * time.Second)
+
+	if err != nil || err2 != nil {
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"message": "登录失败",
+		})
+		return
+	}
+
+	ginCtx.SetCookie(
+		"access_token",
+		accessToken,
+		conf.JWT.AccExpTime,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+	ginCtx.SetCookie(
+		"refresh_token",
+		refreshToken,
+		conf.JWT.RefExpTime,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
 
 	ginCtx.JSON(http.StatusOK, gin.H {
 		"message": "登录成功",
+		"expires_in": conf.JWT.AccExpTime,
 		"user": resp.User,
 	})
 }

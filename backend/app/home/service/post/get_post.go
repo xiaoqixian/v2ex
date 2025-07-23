@@ -5,36 +5,19 @@
 package post_service
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
+	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
 	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/postpb"
+	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
-
-func getPostCallback(
-	ctx context.Context, 
-	client postpb.PostServiceClient,
-	req *postpb.GetPostRequest,
-) (any, error) {
-	resp, err := client.GetPost(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	if e, ok := resp.Result.(*postpb.GetPostResponse_Err); ok {
-		return nil, fmt.Errorf("rpc GetPost failed: %s", e.Err.Message)
-	}
-
-	o, _ := resp.Result.(*postpb.GetPostResponse_Ok)
-	return o.Ok, nil
-}
-
 
 func GetPost(ginCtx *gin.Context) {
 	postid, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
@@ -45,22 +28,14 @@ func GetPost(ginCtx *gin.Context) {
 		return
 	}
 
-	var userid uint64
-	accessToken, err := ginCtx.Cookie("access_token")
-
-	if err == nil {
-		userid, _ = util.ParseToken(accessToken)
-	}
-
 	req := postpb.GetPostRequest {
 		PostId: postid,
-		UserId: userid,
 	}
 
 	conf := conf.GetConf()
-	resp, err := rpcutil.NewBuilder(&req, postpb.NewPostServiceClient).
+	respAny, err := rpcutil.NewBuilder(&req, postpb.NewPostServiceClient).
 		WithService(conf.Consul.Post).
-		WithCallback(getPostCallback).
+		WithMethod("GetPost").
 		WithMsTimeout(conf.Rpc.RpcTimeout).
 		Call()
 	if err != nil {
@@ -69,6 +44,52 @@ func GetPost(ginCtx *gin.Context) {
 		})
 		return
 	}
+
+	resp, ok := respAny.(*postpb.GetPostResponse)
+	if !ok {
+		log.Printf("[GetPost] Expect *postpb.GetPostResponse, got '%T'\n", respAny)
+		ginCtx.JSON(http.StatusInternalServerError, gin.H {
+			"error": "wrong rpc response type",
+		})
+		return
+	}
+
+	if !resp.Found {
+		ginCtx.JSON(http.StatusNotFound, gin.H {
+			"error": fmt.Sprintf("Post %d not found", postid),
+		})
+		return
+	}
+
+	var author, avatar string
+	{
+		var wg sync.WaitGroup
+		var err1 error
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err1 = util.GetUserInfo(resp.AuthorId, func(resp *userpb.GetUserInfoResponse) {
+				author = resp.Name
+				avatar = resp.Avatar
+			})
+		}()
+
+		wg.Wait()
+		
+		if err1 != nil {
+			ginCtx.JSON(http.StatusInternalServerError, gin.H {
+				"error": err1.Error(),
+			})
+			return
+		}
+	}
 	
-	ginCtx.JSON(http.StatusOK, resp)
+	ginCtx.JSON(http.StatusOK, gin.H {
+		"author": author,
+		"avatar": avatar,
+		"title": resp.Title,
+		"created_at": resp.CreatedAt,
+		"node": resp.Node,
+		"content": resp.Content,
+	})
 }

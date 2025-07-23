@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
-	user_service "github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/commentpb"
 )
 
@@ -26,23 +25,18 @@ func SubmitComment(ginCtx *gin.Context) {
 		return
 	}
 
-	accessToken, err := ginCtx.Cookie("access_token")
-	if err != nil {
+	userid, exists := ginCtx.Get("userid")
+	if !exists {
+		log.Panicln("userid not found in gin context, authentication should be done before submitting a comment")
 		ginCtx.JSON(http.StatusUnauthorized, gin.H {
-			"error": "登录信息已失效，请重新登录",
+			"error": "unauthorized",
 		})
 		return
 	}
 
 	req := commentpb.AddCommentRequest {
 		PostId: postid,
-	}
-	req.UserId, err = user_service.CheckUser(accessToken)
-	if err != nil {
-		ginCtx.JSON(http.StatusUnauthorized, gin.H {
-			"error": "登录信息已失效，请重新登录",
-		})
-		return
+		UserId: userid.(uint64),
 	}
 
 	if err = ginCtx.ShouldBindJSON(&req); err != nil {

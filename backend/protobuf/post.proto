@@ -18,35 +18,26 @@ message PublishPostResponse {
   string message = 2;
 }
 
-message GetPostRequest {
-  uint64 post_id = 1;
-  // 0 represents invalid user id, hence the user is not logged in.
-  uint64 user_id = 2;
-}
-
-message GetPostOkResponse {
-  string title = 1;
-  string author = 2;
-  string node = 3;
-  string content = 4;
-  google.protobuf.Timestamp created_at = 5;
-}
-message GetPostErrResponse {
-  string message = 1;
-}
-message GetPostResponse {
-  oneof result {
-    GetPostOkResponse ok = 1;
-    GetPostErrResponse err = 2;
-  }
-}
-
 message PostEntry {
   uint64 post_id = 1;
   uint64 author_id = 2;
   string title = 3;
   string node = 4;
   google.protobuf.Timestamp created_at = 5;
+}
+
+message GetPostRequest {
+  uint64 post_id = 1;
+}
+
+message GetPostResponse {
+  bool found = 1;
+  uint64 post_id = 2;
+  uint64 author_id = 3;
+  string title = 4;
+  string node = 5;
+  google.protobuf.Timestamp created_at = 6;
+  string content = 7;
 }
 
 message GetPostsForUserRequest {
@@ -58,8 +49,13 @@ message GetPostsForUserResponse {
   repeated PostEntry posts = 2;
 }
 
+message AddPostViewRequest {}
+message AddPostViewResponse {}
+
 service PostService {
   rpc PublishPost (PublishPostRequest) returns (PublishPostResponse);
   rpc GetPostsForUser (GetPostsForUserRequest) returns (GetPostsForUserResponse);
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
+
+  rpc AddPostView (AddPostViewRequest) returns (AddPostViewResponse);
 }
