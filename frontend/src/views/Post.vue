@@ -2,9 +2,7 @@
   <div class="v2ex-container">
     <header class="v2ex-header">
       <nav class="v2ex-nav">
-        <a href="#" class="v2ex-logo">V2EX</a>
-        <span class="v2ex-nav-separator">›</span>
-        <span class="v2ex-nav-current">Java</span>
+        <a href="/" class="v2ex-logo">V2EX</a>
       </nav>
     </header>
 
@@ -21,18 +19,13 @@
                 <span class="views">{{ views }}次点击</span>
               </div>
               <div class="author-avatar">
-                <img src="../assets/default_avatar.png" alt="用户头像">
+                <img :src="authorAvatar" @error="onAvatarError">
               </div>
             </div>
           </div>
 
           <div class="post-content">
             <p>{{ content }}</p>
-          </div>
-
-          <div class="post-append">
-            <div class="v2ex-append-title">第 1 条附言 · 1 天前</div>
-            <p>我没加方法上，之前是挺快的，拉取代码后就慢了，所以拉取代码后有个能断点位置变到方法定义上了？</p>
           </div>
 
           <div class="post-actions">
@@ -43,8 +36,9 @@
           </div>
 
           <div class="post-stats">
-            <span>4571 次点击 · 4 人收藏</span>
+            <span>{{ views }} 次点击</span>
           </div>
+
         </article>
       </div>
 
@@ -92,12 +86,14 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { useUserStore } from '@/stores/user';
 import { timeEval } from '@/utils/time';
+import { onAvatarError } from '@/utils/img-load-err';
 
 const route = useRoute()
 const userStore = useUserStore()
 
 const title = ref('')
 const author = ref('')
+const authorAvatar = ref('')
 const views = ref(1234)
 const createdAt = ref(1750412014)
 const createTime = computed(() => {
@@ -118,6 +114,7 @@ async function fetchContent() {
     console.log(res.data)
     title.value = res.data.title
     author.value = res.data.author
+    authorAvatar.value = res.data.avatar
     createdAt.value = res.data.created_at.seconds
     content.value = res.data.content
   } catch (err) {
@@ -250,6 +247,7 @@ onMounted(() => {
 }
 
 .post-content {
+  font-size: 16px;
   margin-bottom: 20px;
   line-height: 1.8;
   color: #333;

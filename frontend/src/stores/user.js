@@ -18,6 +18,7 @@ export const useUserStore = defineStore("user", {
         this.isLoggedIn = true
         this.userInfo = res.data
       } catch (err) {
+        console.error(err)
         this.isLoggedIn = false
         this.userInfo = null
       } finally {

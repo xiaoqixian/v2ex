@@ -32,6 +32,7 @@
 import { ref, inject, computed, watch, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { timeEval } from '@/utils/time';
+import { onAvatarError } from '@/utils/img-load-err';
 import axios from 'axios';
 
 const { current } = inject('theme', { current: ref('v2ex') });
@@ -67,11 +68,6 @@ onMounted(async () => {
   topics.value = await getTopics()
 })
 
-const defaultAvatar = new URL("@/assets/default_avatar.png", import.meta.url).href
-
-function onAvatarError(event) {
-  event.target.src = defaultAvatar
-}
 </script>
 
 <style scoped>
