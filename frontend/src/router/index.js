@@ -10,6 +10,7 @@ import Login from '@/views/Login.vue'
 import Home from '@/views/Home.vue'
 import Write from '@/views/Write.vue'
 import Post from '@/views/Post.vue'
+import Search from '@/views/Search.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -25,6 +26,10 @@ const routes = [
   {
     path: '/post/:id',
     component: Post
+  },
+  {
+    path: "/search",
+    component: Search
   }
 ]
 

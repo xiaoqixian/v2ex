@@ -13,3 +13,7 @@ export function timeEval(seconds) {
   if (diff < 31536000) return `${Math.floor(diff / 2592000)} 个月前`
   return `${Math.floor(diff / 31536000)} 年前`
 }
+
+export function timeEvalTimeStr(timeStr) {
+  return timeEval(Math.floor(new Date(timeStr).getTime() / 1000));
+}

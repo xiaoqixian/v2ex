@@ -327,7 +327,7 @@ onMounted(() => {
   margin-right: 15px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .comment-avatar {

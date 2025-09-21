@@ -13,7 +13,7 @@
           {{ tab.name }}
         </a>
       </div>
-      <div class="secondary-tabs" v-if="activeTab !== null && secondaryTabs.length > 0">
+      <div class="secondary-tabs" v-if="false && activeTab !== null && secondaryTabs.length > 0">
         <a 
           v-for="(tab, index) in secondaryTabs" 
           :key="index"
@@ -37,7 +37,7 @@ const { current } = inject('theme');
 
 // 定义props和emit
 const props = defineProps({
-  selectedCategory: {
+  selectedTopic: {
     type: String,
     default: null
   }
@@ -47,53 +47,13 @@ const emit = defineEmits(['update:selectedCategory']);
 
 // 主标签数据
 const primaryTabs = [
-  { 
-    name: '技术',
-    categories: ['分享创造', '设计', '奇思妙想'] 
+  {
+    name: "推荐",
+    categories: []
   },
-  { 
-    name: '创意',
-    categories: ['分享发现', '设计', '奇思妙想'] 
-  },
-  { 
-    name: '好玩',
-    categories: ['分享发现', '游戏', '电子产品', '电影'] 
-  },
-  { 
-    name: 'Apple',
-    categories: ['macOS', 'iOS', 'iPad', 'Apple Watch'] 
-  },
-  { 
-    name: '酷工作',
-    categories: ['招聘', '求职', '远程工作', '实习'] 
-  },
-  { 
-    name: '交易',
-    categories: ['二手交易', '物物交换', '免费赠送'] 
-  },
-  { 
-    name: '城市',
-    categories: ['北京', '上海', '广州', '深圳', '杭州', '成都'] 
-  },
-  { 
-    name: '问与答',
-    categories: ['问答', '知道', '技术问答'] 
-  },
-  { 
-    name: '最热',
-    categories: [] 
-  },
-  { 
-    name: '全部',
-    categories: ['节点导航', '收藏夹', '我的收藏'] 
-  },
-  { 
-    name: 'R2',
-    categories: [] 
-  },
-  { 
-    name: 'VXNA',
-    categories: [] 
+  {
+    name: "热门",
+    categories: []
   }
 ];
 
@@ -132,7 +92,7 @@ const setActiveSecondaryTab = (index) => {
 
 // 更新选中的分类并触发事件
 const updateSelectedCategory = () => {
-  emit('update:selectedCategory', selectedCategory.value);
+  emit('update:selectedTopic', selectedCategory.value);
 };
 
 // 初始化时触发一次更新

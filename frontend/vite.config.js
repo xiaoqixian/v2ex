@@ -17,7 +17,7 @@ export default defineConfig({
       '/api': {
         target: process.env.VUE_ENV === 'online'
           ? 'http://62.234.20.127:8080/'
-          : 'http://localhost:8080/',
+          : 'http://0.0.0.0:8080/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       }

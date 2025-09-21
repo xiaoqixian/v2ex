@@ -4,7 +4,6 @@
     <div class="container">
       <div class="main-content">
         <div class="left-content">
-          <TabNav v-model:selectedTopic="selectedTopic" />
           <PostList :posts="posts" />
         </div>
         <div class="right-content">
@@ -16,23 +15,22 @@
 </template>
 
 <script setup>
-import { ref, provide, watch, onMounted } from 'vue';
-import Header from '@/components/Header.vue';
-//import TopicList from '@/components/TopicList.vue';
+import { ref, provide, watch, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import PostList from '@/components/PostList.vue';
 import Sidebar from '@/components/Sidebar.vue';
-import TabNav from '@/components/TabNav.vue';
-import { themes, defaultTheme } from '@/themes.js';
+import Header from '@/components/Header.vue';
 import axios from "axios";
 
-const getPosts = async (topic) => {
+import { themes, defaultTheme } from '@/themes.js';
+
+const route = useRoute()
+const keyword = computed(() => route.query.keyword || '')
+
+const getPosts = async (keyword) => {
   try {
-    const res = await axios.get('/api/rec_posts', { 
-      withCredential: true,
-      params: {
-        topic_id: topic,
-        size: 20
-      }
+    const res = await axios.get(`/api/search?keyword=${encodeURIComponent(keyword)}`, { 
+      withCredential: true
     })
     console.log("res.data = ")
     console.log(res.data)
@@ -42,39 +40,17 @@ const getPosts = async (topic) => {
   }
 }
 
-const currentTheme = ref(localStorage.getItem('theme') || defaultTheme);
-
 const posts = ref([])
-const selectedTopic = ref('')
-
-provide('theme', {
-  current: currentTheme,
-  themes,
-  setTheme: (theme) => {
-    currentTheme.value = theme;
-    localStorage.setItem('theme', theme);
-    applyTheme(theme);
-  }
-});
-
-const applyTheme = (themeName) => {
-  const theme = themes[themeName];
-  if (!theme) return;
-  
-  const root = document.documentElement;
-  Object.entries(theme.colors).forEach(([key, value]) => {
-    root.style.setProperty(`--${key}`, value);
-  });
-};
-
-watch(currentTheme, (newTheme) => {
-  applyTheme(newTheme);
-});
 
 onMounted(async () => {
-  applyTheme(currentTheme.value);
-  posts.value = await getPosts(selectedTopic.value);
-});
+  posts.value = await getPosts(keyword.value)
+})
+
+watch(() => route.query.keyword, async (newKeyword) => {
+  if (!newKeyword) return
+  posts.value = await getPosts(newKeyword)
+}, { immediate: true })
+
 </script>
 
 <style>

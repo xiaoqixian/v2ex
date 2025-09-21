@@ -2,10 +2,16 @@
   <header class="header">
     <div class="header-inner">
       <div class="logo">
-        <a href="#">V2EX</a>
+        <a href="/">V2EX</a>
       </div>
       <div class="search">
-        <input type="text" class="search-input" placeholder="搜索" />
+        <input 
+          type="text" 
+          v-model="keyword"
+          class="search-input" 
+          placeholder="搜索"
+          @keyup.enter="submitSearch"
+        />
       </div>
       <nav class="main-nav">
         <div class="theme-switcher">
@@ -19,7 +25,7 @@
             {{ theme.name }}
           </button>
         </div>
-        <a href="#" class="nav-item">首页</a>
+        <a href="/" class="nav-item">首页</a>
         <router-link v-if="!userStore.isLoggedIn" to="/register" class="nav-item">注册</router-link>
         <router-link v-if="!userStore.isLoggedIn" to="/login" class="nav-item">登录</router-link>
         <button v-if="userStore.isLoggedIn" @click="handleLogout" class="nav-item" id="logout-btn">登出</button>
@@ -29,12 +35,22 @@
 </template>
 
 <script setup>
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
 import { useUserStore } from "@/stores/user"
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const keyword = ref('')
+
+function submitSearch() {
+  if (keyword.value.trim()) {
+    router.push({ path: '/search', query: { keyword: keyword.value } })
+  }
+}
 
 const userStore = useUserStore()
 
-const { current, themes, setTheme } = inject('theme');
+// const { current, themes, setTheme } = inject('theme');
 
 function handleLogout() {
   localStorage.removeItem("access_token")
