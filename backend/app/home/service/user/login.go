@@ -71,7 +71,7 @@ func UserLogin(ginCtx *gin.Context) {
 		accessToken,
 		conf.JWT.AccExpTime,
 		"/",
-		"localhost",
+		"",
 		false,
 		true,
 	)
@@ -80,7 +80,7 @@ func UserLogin(ginCtx *gin.Context) {
 		refreshToken,
 		conf.JWT.RefExpTime,
 		"/",
-		"localhost",
+		"",
 		false,
 		true,
 	)

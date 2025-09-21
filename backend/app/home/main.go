@@ -24,7 +24,7 @@ func main() {
 		AllowAllOrigins: true,
 		AllowCredentials: true,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders:     []string{"Content-Type"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 	}))
 
 	r.POST("/register", user_service.RegisterUser)
