@@ -64,7 +64,7 @@
         
         <div class="comment" v-for="(comment, index) in comments" :key="index">
           <div class="comment-left">
-            <img class="comment-avatar" src="@/assets/default_avatar.png" :alt="comment.author">
+            <img class="comment-avatar" :src="comment.avatar" alt="@/assets/default_avatar.png">
           </div>
           <div class="comment-right">
             <div class="comment-header">
