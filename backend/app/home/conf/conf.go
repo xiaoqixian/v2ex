@@ -26,6 +26,7 @@ type Config struct {
 		User    string `yaml:"user"`
 		Post    string `yaml:"post"`
 		Comment string `yaml:"comment"`
+		Rec     string `yaml:"rec"`
 	} `yaml:"consul"`
 }
 

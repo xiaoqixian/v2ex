@@ -89,7 +89,6 @@ func GetPost(ginCtx *gin.Context) {
 		"avatar": avatar,
 		"title": resp.Title,
 		"created_at": resp.CreatedAt,
-		"node": resp.Node,
 		"content": resp.Content,
 	})
 }

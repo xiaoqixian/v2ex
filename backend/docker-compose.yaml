@@ -9,7 +9,7 @@ services:
       MYSQL_USER: lunar
       MYSQL_PASSWORD: lunar
     volumes:
-      - mysqldata:/var/lib/mysql
+      - /home/lunar/.local/share/mysqldata:/var/lib/mysql
     ports:
       - "3306:3306"
 
@@ -20,7 +20,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redisdata:/data
+      - /home/lunar/.local/share/redisdata:/data
     command: redis-server --appendonly yes
 
   consul:
@@ -38,6 +38,8 @@ services:
     hostname: kafka
     ports:
       - "9092:9092"
+    volumes:
+      - /home/lunar/.local/share/kafkadata:/bitnami/kafka
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
@@ -47,6 +49,28 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - ELASTIC_PASSWORD=changeme        # 默认超级用户密码
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - /home/lunar/.local/share/esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
 volumes:
   mysqldata:
   redisdata:
+  esdata:

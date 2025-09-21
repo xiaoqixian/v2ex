@@ -10,6 +10,8 @@ import (
 	"github.com/xiaoqixian/v2ex/backend/app/home/mid"
 	"github.com/xiaoqixian/v2ex/backend/app/home/service/comment"
 	"github.com/xiaoqixian/v2ex/backend/app/home/service/post"
+	rec_service "github.com/xiaoqixian/v2ex/backend/app/home/service/rec"
+	search_service "github.com/xiaoqixian/v2ex/backend/app/home/service/search"
 	"github.com/xiaoqixian/v2ex/backend/app/home/service/user"
 )
 
@@ -18,7 +20,8 @@ func main() {
 
 	// CORS(Cross-Origin Resource Sharing) protection
 	r.Use(cors.New(cors.Config {
-		AllowOrigins:     []string{"http://localhost:8000"},
+		// AllowOrigins:     []string{"http://10.129.103.221:8000"},
+		AllowAllOrigins: true,
 		AllowCredentials: true,
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
@@ -35,6 +38,9 @@ func main() {
 
 	r.GET("/comments/:post_id", comment_service.GetComments)
 	r.POST("/comments/:post_id", mid.JWTAuth(), comment_service.SubmitComment)
+
+	r.GET("/rec_posts", mid.JWTParse(), rec_service.RecPosts)
+	r.GET("/search", search_service.SearchKeyword)
 
 	r.Run(":8080")
 }

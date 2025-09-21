@@ -14,3 +14,4 @@ consul:
   user: "user-service"
   post: "post-service"
   comment: "comment-service"
+  rec: "rec-service"

@@ -13,10 +13,11 @@ import (
 
 type Post struct {
 	gorm.Model
-	UserID  uint64 `json:"user_id"  gorm:"not null;index"`
-	Title   string `json:"title"    gorm:"type:varchar(255);not null"`
-	Node    string `json:"node"     gorm:"type:varchar(100);not null"`
-	Content string `json:"content"  gorm:"type:text;not null"`
+	UserID  uint64 `json:"user_id" gorm:"not null;index"`
+	Title   string `json:"title"   gorm:"type:varchar(255);not null"`
+	Topic   uint64 `json:"topic"   gorm:"not null;index"`
+	Content string `json:"content" gorm:"type:text;not null"`
+	Version uint64 `json:"version" gorm:"not null;default:1;version"` // version 用于乐观锁
 }
 
 func AddPost(db *gorm.DB, ctx context.Context, post *Post) error {

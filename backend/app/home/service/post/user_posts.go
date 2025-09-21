@@ -22,7 +22,6 @@ type PostEntry struct {
 	PostId        uint64                 `json:"postid"`
 	Avatar        string                 `json:"avatar"`
 	Title         string                 `json:"title"`
-	Node          string                 `json:"node"`
 	Author        string                 `json:"author"`
 	CreatedAt     *timestamppb.Timestamp `json:"time"`
 	LastReplyFrom string                 `json:"lastReplyFrom"`
@@ -89,7 +88,6 @@ func GetPostsForUser(ginCtx *gin.Context) {
 	for i, p := range resp.Posts {
 		posts[i] = &PostEntry {
 			Title: p.Title,
-			Node: p.Node,
 			CreatedAt: p.CreatedAt,
 			PostId: p.PostId,
 		}

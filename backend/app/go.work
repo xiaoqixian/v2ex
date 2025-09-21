@@ -4,5 +4,6 @@ use (
 	./comment
 	./home
 	./post
+	./rec
 	./user
 )

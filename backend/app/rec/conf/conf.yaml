@@ -1,0 +1,21 @@
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: lunar
+  password: lunar
+  dbname: v2ex
+  charset: utf8mb4
+  parseTime: true
+  loc: Local
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+jwt:
+  secret: "oJQFLx8O+jq7t3lgktV5CrvORkTUellZzhzptMht7dY="
+  # refresh token expiration time, in hours
+  refexptime: 86400
+  # access token expiration time, in seconds
+  accexptime: 900

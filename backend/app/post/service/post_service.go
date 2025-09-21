@@ -66,7 +66,6 @@ func (impl *PostServiceImpl) GetPost(
 		PostId: uint64(post.ID),
 		Title: post.Title,
 		AuthorId: post.UserID,
-		Node: post.Node,
 		CreatedAt: timestamppb.New(post.CreatedAt),
 		Content: post.Content,
 	}, nil
@@ -80,7 +79,6 @@ func (impl *PostServiceImpl) PublishPost(
 	post := model.Post {
 		UserID: in.UserId,
 		Title: in.Title,
-		Node: in.Node,
 		Content: in.Content,
 	}
 
@@ -123,7 +121,6 @@ func (impl *PostServiceImpl) GetPostsForUser(
 			PostId: uint64(p.ID),
 			AuthorId: p.UserID,
 			Title: p.Title,
-			Node: p.Node,
 			CreatedAt: timestamppb.New(p.CreatedAt),
 		}
 	}

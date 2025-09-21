@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package rec;
+
+option go_package = "rpc_gen/recpb;recpb";
+
+message RecRequest {
+  uint64 user_id = 1;
+  uint64 topic_id = 2;
+  uint64 size = 3;
+}
+
+message RecResponse {
+  repeated uint64 post_id_list = 1;
+}
+
+service RecService {
+  rpc RecPosts (RecRequest) returns (RecResponse);
+}

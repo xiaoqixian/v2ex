@@ -36,13 +36,13 @@ func RegisterService(id string, name string, addr string) {
 		Name: name,
 		Address: host,
 		Port: port,
-		Check: &consul.AgentServiceCheck {
-			GRPC: addr,
-			GRPCUseTLS: false,
-			Interval: "10s",
-			Timeout: "2s",
-			DeregisterCriticalServiceAfter: "30s",
-		},
+		// Check: &consul.AgentServiceCheck {
+		// 	GRPC: addr,
+		// 	GRPCUseTLS: false,
+		// 	Interval: "10s",
+		// 	Timeout: "2s",
+		// 	DeregisterCriticalServiceAfter: "30s",
+		// },
 	}
 
 	err = client.Agent().ServiceRegister(registration)

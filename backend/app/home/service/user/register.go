@@ -16,8 +16,6 @@ import (
 )
 
 func RegisterUser(ginCtx *gin.Context) {
-	log.Println("New RegisterUser request")
-
 	var req userpb.RegisterRequest
 	err := ginCtx.ShouldBindJSON(&req)
 	if err != nil {
@@ -40,6 +38,7 @@ func RegisterUser(ginCtx *gin.Context) {
 		return
 	}
 
+	fmt.Println("Got response")
 	resp, ok := respAny.(*userpb.RegisterResponse)
 	if !ok {
 		log.Printf("respAny convert to *userpb.LoginResponse failed, actual type is '%T'\n", respAny)
