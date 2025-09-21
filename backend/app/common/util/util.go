@@ -9,13 +9,32 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"os"
 
 	consul "github.com/hashicorp/consul/api"
 )
 
-func RegisterService(id string, name string, addr string) {
+func GetLocalIpAddr() (ip string) {
+	addrs, _ := net.InterfaceAddrs()
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			ip = ipnet.IP.String()
+			break
+		}
+	}
+	return ip
+}
+
+func GetEnv(key, defaultVal string) string {
+  if val, ok := os.LookupEnv(key); ok {
+    return val
+  }
+  return defaultVal
+}
+
+func ConsulRegisterService(id string, name string, addr string) {
 	config := consul.DefaultConfig()
-	config.Address = "localhost:8500"
+	config.Address = fmt.Sprintf("%s:8500", GetEnv("CONSULADDR", "localhost"))
 
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -47,7 +66,7 @@ func RegisterService(id string, name string, addr string) {
 
 	err = client.Agent().ServiceRegister(registration)
 	if err != nil {
-		log.Fatalf("register service failed: %s\n", err.Error())
+		log.Fatalf("register service at (%s) failed: %s\n", addr, err.Error())
 	}
 	
 	fmt.Printf("Service %s registered successfully!\n", id)

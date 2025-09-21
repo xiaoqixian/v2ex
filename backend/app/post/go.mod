@@ -4,6 +4,7 @@ go 1.24.3
 
 require (
 	github.com/xiaoqixian/v2ex/backend/rpc_gen v0.0.0
+	github.com/xiaoqixian/v2ex/backend/app/common v0.0.0
 	google.golang.org/grpc v1.73.0
 )
 
@@ -31,3 +32,4 @@ require (
 )
 
 replace github.com/xiaoqixian/v2ex/backend/rpc_gen => ../../rpc_gen
+replace github.com/xiaoqixian/v2ex/backend/app/common => ../common

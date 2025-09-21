@@ -8,11 +8,12 @@ option go_package = "rpc_gen/commentpb;commentpb";
 
 message Comment {
   uint64 comment_id = 1;
-  string user_name = 2;
-  string content = 3;
-  uint32 likes = 4;
-  google.protobuf.Timestamp created_at = 5;
-  string avatar = 6;
+  uint64 user_id = 2;
+  uint64 post_id = 3;
+  uint64 reply_to = 4;
+  string content = 5;
+  uint32 likes = 6;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message AddCommentRequest {

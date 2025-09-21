@@ -8,7 +8,8 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/xiaoqixian/v2ex/backend/app/post/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/comment/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/common/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -33,7 +34,7 @@ func initMysql(c *conf.MySQLConfig) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=%s&loc=%s", 
 		c.User,
 		c.Password,
-		c.Host,
+		util.GetEnv("MYSQLADDR", "localhost"),
 		c.Port,
 		c.DBName,
 		c.Charset,
@@ -51,7 +52,7 @@ func initMysql(c *conf.MySQLConfig) {
 func initRedis(c *conf.RedisConfig) {
 	// connect to redis
 	Redis = redis.NewClient(&redis.Options {
-		Addr:     c.Addr,
+		Addr:     fmt.Sprintf("%s:6379", util.GetEnv("REDISADDR", "localhost")),
 		Password: c.Password,
 		DB:       c.DB,
 	})

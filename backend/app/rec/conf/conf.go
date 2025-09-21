@@ -11,7 +11,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-
 type MySQLConfig struct {
 	Host      string `yaml:"host"`
 	Port      int    `yaml:"port"`

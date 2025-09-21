@@ -20,14 +20,18 @@ import (
 func main() {
 	dal.Init()
 
-	const addr = "localhost:8082"
+	// const addr = "0.0.0.0:8082"
+	addr := util.GetEnv("BINDADDR", "")
+	if addr == "" {
+		log.Fatalf("BINDADDR env var not found")
+	}
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
 
-	util.RegisterService("post-service", "post-service", addr)
+	util.ConsulRegisterService("post-service", "post-service", addr)
 
 	grpcServer := grpc.NewServer()
 	service, err := service.NewPostService()

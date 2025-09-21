@@ -31,6 +31,7 @@ func RecPosts(ginCtx *gin.Context) {
 	userid, _ := ginCtx.Get("userid")
 	req.UserId = userid.(uint64)
 
+
 	conf := conf.GetConf()
 	respAny, err := rpcutil.NewBuilder(&req, recpb.NewRecServiceClient).
 		WithService(conf.Consul.Rec).
@@ -39,6 +40,7 @@ func RecPosts(ginCtx *gin.Context) {
 		Call()
 
 	if err != nil {
+		fmt.Printf("Error call rec service %s: %s\n", conf.Consul.Rec, err.Error())
 		ginCtx.JSON(http.StatusServiceUnavailable, gin.H {
 			"error": err.Error(),
 		})

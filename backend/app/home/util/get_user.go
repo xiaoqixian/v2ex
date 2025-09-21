@@ -12,9 +12,9 @@ import (
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/userpb"
 )
 
-type R = *userpb.GetUserInfoResponse
+type UserInfo = *userpb.GetUserInfoResponse
 
-func getUserInfo(userid uint64, justCheckExist bool, withResp func(R)) error {
+func getUserInfo(userid uint64, justCheckExist bool, withResp func(UserInfo)) error {
 	req := userpb.GetUserInfoRequest {
 		UserId: userid,
 		JustCheckExist: justCheckExist,
@@ -41,13 +41,41 @@ func getUserInfo(userid uint64, justCheckExist bool, withResp func(R)) error {
 	return nil
 }
 
-func GetUserInfo(userid uint64, withResp func(R)) error {
+func GetBatchUserInfo(useridList []uint64, withResp func(int, UserInfo)) error {
+	req := userpb.GetBatchUserInfoRequest {
+		UserIdList: useridList,
+	}
+
+	conf := conf.GetConf()
+	respAny, err := rpcutil.NewBuilder(&req, userpb.NewUserServiceClient).
+		WithService(conf.Consul.User).
+		WithMethod("GetBatchUserInfo").
+		WithMsTimeout(conf.Rpc.RpcTimeout).
+		Call()
+
+	if err != nil {
+		return err
+	}
+	
+	resp, ok := respAny.(*userpb.GetBatchUserInfoResponse)
+	if !ok {
+		// log.Panicf("[GetUserInfo] expect resp type '*userpb.GetUserInfoResponse', got '%T'", respAny)
+		return fmt.Errorf("[GetUserInfo] expect resp type '*userpb.GetUserInfoResponse', got '%T'", respAny)
+	}
+
+	for i, _ := range useridList {
+		withResp(i, resp.UserInfoList[i])
+	}
+	return nil
+}
+
+func GetUserInfo(userid uint64, withResp func(UserInfo)) error {
 	return getUserInfo(userid, false, withResp)
 }
 
 func CheckUserExist(userid uint64) (bool, error) {
 	var exist bool
-	err := getUserInfo(userid, true, func(resp R) {
+	err := getUserInfo(userid, true, func(resp UserInfo) {
 		exist = resp.Exist
 	})
 	return exist, err

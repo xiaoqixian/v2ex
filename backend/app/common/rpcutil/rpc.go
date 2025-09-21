@@ -12,6 +12,7 @@ import (
 	"time"
 
 	consul "github.com/hashicorp/consul/api"
+	"github.com/xiaoqixian/v2ex/backend/app/common/util"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -107,7 +108,8 @@ func (b *Builder[A, C]) Call() (any, error) {
 	}
 	
 	consulCli := getConsulClient()
-	services, _, err := consulCli.Health().Service(b.service, "", true, nil)
+	services, _, err := consulCli.Health().Service(b.service, "", false, nil)
+	// services, _, err := consulCli.Catalog().Service(b.service, "", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +133,7 @@ func (b *Builder[A, C]) Call() (any, error) {
 func getConsulClient() *consul.Client {
   once.Do(func() {
     config := consul.DefaultConfig()
-    config.Address = "127.0.0.1:8500"
+    config.Address = fmt.Sprintf("%s:8500", util.GetEnv("CONSULADDR", "localhost"))
 
     var err error
     consulClient, err = consul.NewClient(config)

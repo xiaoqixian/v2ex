@@ -1,8 +1,9 @@
+version: "3.9"
+
 services:
   db:
     image: mysql:8
     container_name: mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: v2ex
@@ -12,25 +13,32 @@ services:
       - /home/lunar/.local/share/mysqldata:/var/lib/mysql
     ports:
       - "3306:3306"
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.10
 
   redis:
     image: redis:7
     container_name: my_redis
-    restart: always
     ports:
       - "6379:6379"
     volumes:
       - /home/lunar/.local/share/redisdata:/data
     command: redis-server --appendonly yes
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.11
 
   consul:
     image: consul:1.15
     container_name: my_consul
-    restart: always
     ports:
       - "8500:8500"
       - "8600:8600/udp"
     command: "agent -dev -client=0.0.0.0"
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.12
 
   kafka:
     image: bitnami/kafka:latest
@@ -48,6 +56,9 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.13
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
@@ -58,7 +69,7 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=changeme        # 默认超级用户密码
+      - ELASTIC_PASSWORD=changeme
       - xpack.security.enabled=false
     ulimits:
       memlock:
@@ -69,6 +80,103 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.14
+
+  home:
+    build: 
+      context: .
+      dockerfile: ./app/home/Dockerfile
+    container_name: home_srv
+    ports:
+      - "8080:8080"
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.20
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - elasticsearch
+      - consul
+    environment:
+      BINDADDR: "172.20.0.20:8080"
+
+  post:
+    build: 
+      context: .
+      dockerfile: ./app/post/Dockerfile
+    container_name: post_srv
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.21
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - elasticsearch
+      - consul
+    environment:
+      BINDADDR: "172.20.0.21:8081"
+
+  user:
+    build: 
+      context: .
+      dockerfile: ./app/user/Dockerfile
+    container_name: user_srv
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.22
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - elasticsearch
+      - consul
+    environment:
+      BINDADDR: "172.20.0.22:8082"
+
+  comment:
+    build: 
+      context: .
+      dockerfile: ./app/comment/Dockerfile
+    container_name: comment_srv
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.23
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - elasticsearch
+      - consul
+    environment:
+      BINDADDR: "172.20.0.23:8083"
+
+  rec:
+    build: 
+      context: .
+      dockerfile: ./app/rec/Dockerfile
+    container_name: rec_srv
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.24
+    depends_on:
+      - db
+      - redis
+      - kafka
+      - elasticsearch
+      - consul
+    environment:
+      BINDADDR: "172.20.0.24:8084"
+
+networks:
+  v2ex-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
   mysqldata:

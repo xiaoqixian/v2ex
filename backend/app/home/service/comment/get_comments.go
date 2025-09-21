@@ -9,12 +9,29 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/common/rpcutil"
 	"github.com/xiaoqixian/v2ex/backend/app/home/conf"
+	"github.com/xiaoqixian/v2ex/backend/app/home/util"
 	"github.com/xiaoqixian/v2ex/backend/rpc_gen/commentpb"
 )
+
+type CommentEntry struct {
+	CommentId uint64 `json:"comment_id"`
+	PostId  uint64   `json:"post_id"`
+	UserId  uint64   `json:"user_id"`
+	ReplyTo uint64   `json:"reply_to"`
+	Content string `json:"content"`
+	// Set to 0 if this is comment to the post, 
+	// otherwise this is a reply to the comment that 
+	// has the ID equals to ReplyTo
+	Likes   uint64   `json:"likes"`
+	CreatedAt time.Time `json:"created_at"`
+	UserName string `json:"username"`
+	Avatar string `json:"avatar"`
+}
 
 func GetComments(ginCtx *gin.Context) {
 	postid, err := strconv.ParseUint(ginCtx.Param("post_id"), 10, 64)
@@ -51,5 +68,31 @@ func GetComments(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, resp.Comments)
+	userids := make([]uint64, len(resp.Comments))
+	for i, cmt := range resp.Comments {
+		userids[i] = cmt.UserId
+	}
+
+	entries := make([]CommentEntry, 0, len(resp.Comments))
+	for _, cmt := range resp.Comments {
+		entries = append(entries, CommentEntry {
+			CommentId: cmt.CommentId,
+			PostId: cmt.PostId,
+			UserId: cmt.UserId,
+			ReplyTo: cmt.ReplyTo,
+			Content: cmt.Content,
+			Likes: uint64(cmt.Likes),
+			CreatedAt: cmt.CreatedAt.AsTime(),
+		})
+	}
+	util.GetBatchUserInfo(userids, func(idx int, userInfo util.UserInfo) {
+		if !userInfo.Exist {
+			entries[idx].UserName = "用户已注销"
+		} else {
+			entries[idx].UserName = userInfo.Name
+			entries[idx].Avatar = userInfo.Avatar
+		}
+	})
+
+	ginCtx.JSON(http.StatusOK, entries)
 }

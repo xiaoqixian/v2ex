@@ -16,6 +16,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gin-gonic/gin"
 	"github.com/xiaoqixian/v2ex/backend/app/home/util"
+	common_util "github.com/xiaoqixian/v2ex/backend/app/common/util"
 )
 
 func SearchKeyword(ginCtx *gin.Context) {
@@ -28,7 +29,7 @@ func SearchKeyword(ginCtx *gin.Context) {
 	}
 
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
-			Addresses: []string{"http://localhost:9200"},
+			Addresses: []string{fmt.Sprintf("http://%s:9200", common_util.GetEnv("ESADDR", "localhost"))},
 			Username:  "elastic",
 			Password:  "changeme",
 	})

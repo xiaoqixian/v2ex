@@ -89,44 +89,16 @@ func (impl *CommentServiceImpl) GetComments(
 		return nil, err
 	}
 	
-	userIDList := make([]uint64, len(comments))
-	for i, c := range comments {
-		userIDList[i] = uint64(c.UserID)
-	}
-	getBatchUserInfoReq := userpb.GetBatchUserInfoRequest {
-		UserIdList: userIDList,
-	}
-
-	conf := conf.GetConf()
-	userInfoListAny, err := rpcutil.NewBuilder(&getBatchUserInfoReq, userpb.NewUserServiceClient).
-		WithService(conf.Consul.User).
-		WithMethod("GetBatchUserInfo").
-		WithMsTimeout(conf.Rpc.RpcTimeout).
-		Call()
-	if err != nil {
-		return nil, err
-	}
-
-	userInfoListResp, ok := userInfoListAny.(*userpb.GetBatchUserInfoResponse)
-	if !ok {
-		return nil, fmt.Errorf("[GetComments] expect type '*userpb.GetBatchUserInfoResponse', got '%T'", userInfoListAny)
-	}
-
-	userInfoList := userInfoListResp.UserInfoList
-
 	respComments := make([]*commentpb.Comment, 0, len(comments))
-	for i, c := range comments {
-		if !userInfoList[i].Exist {
-			continue
-		}
-
+	for _, c := range comments {
 		respComments = append(respComments, &commentpb.Comment {
 			CommentId: uint64(c.ID),
-			UserName: userInfoList[i].Name,
+			UserId: uint64(c.UserID),
+			PostId: uint64(c.PostID),
+			ReplyTo: uint64(c.ReplyTo),
 			Content: c.Content,
 			Likes: uint32(c.Likes),
 			CreatedAt: timestamppb.New(c.CreatedAt),
-			Avatar: userInfoList[i].Avatar,
 		})
 	}
 
