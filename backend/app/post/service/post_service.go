@@ -7,6 +7,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -48,27 +49,62 @@ func NewPostService() (*PostServiceImpl, error) {
 }
 
 func (impl *PostServiceImpl) GetPost(
-	ctx context.Context,
-	in *postpb.GetPostRequest,
+  ctx context.Context,
+  in *postpb.GetPostRequest,
 ) (*postpb.GetPostResponse, error) {
-	post, err := model.GetPostById(impl.db, ctx, uint(in.PostId))
-	if err != nil {
-		return nil, err
-	}
-	if post == nil {
-		return &postpb.GetPostResponse {
-			Found: false,
-		}, nil
-	}
+  postKey := fmt.Sprintf("post:%d", in.PostId)
+  cacheStr, err := impl.redis.Get(ctx, postKey).Result()
 
-	return &postpb.GetPostResponse {
-		Found: true,
-		PostId: uint64(post.ID),
-		Title: post.Title,
-		AuthorId: post.UserID,
-		CreatedAt: timestamppb.New(post.CreatedAt),
-		Content: post.Content,
-	}, nil
+  if err == nil {
+    var resp postpb.GetPostResponse
+    if json.Unmarshal([]byte(cacheStr), &resp) == nil {
+      return &resp, nil
+    }
+    log.Println("Something wrong with cache unmarshal, fallback to DB")
+  } else if err != redis.Nil {
+    log.Printf("Redis get error: %s", err.Error())
+  }
+
+  post, err := model.GetPostById(impl.db, ctx, uint(in.PostId))
+  if err != nil {
+    return nil, err
+  }
+
+  if post == nil {
+    emptyResp := postpb.GetPostResponse{Found: false}
+    data, _ := json.Marshal(&emptyResp)
+    impl.redis.Set(ctx, postKey, data, 5*time.Minute)
+    return &emptyResp, nil
+  }
+
+  resp := postpb.GetPostResponse{
+    Found:     true,
+    PostId:    uint64(post.ID),
+    Title:     post.Title,
+    AuthorId:  post.UserID,
+    CreatedAt: timestamppb.New(post.CreatedAt),
+    Content:   post.Content,
+  }
+
+  postViewRedisKey := fmt.Sprintf("post_view_cnt:%d", in.PostId)
+  script := redis.NewScript(`
+    local v = redis.call("INCR", KEYS[1])
+    if v == 1 then
+      redis.call("EXPIRE", KEYS[1], ARGV[1])
+    end
+    return v
+  `)
+  postViewCnt, err := script.Run(ctx, impl.redis, []string{postViewRedisKey}, int64(time.Hour.Seconds())).Int64()
+  if err != nil {
+    log.Printf("Redis incr script error: %s", err.Error())
+  }
+
+  if postViewCnt > 100 {
+    respData, _ := json.Marshal(&resp)
+    impl.redis.Set(ctx, postKey, respData, time.Hour)
+  }
+
+  return &resp, nil
 }
 
 func (impl *PostServiceImpl) PublishPost(

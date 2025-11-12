@@ -17,6 +17,17 @@ services:
       v2ex-net:
         ipv4_address: 172.20.0.10
 
+  mysqld_exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld_exporter
+    restart: always
+    ports:
+      - "9104:9104"
+    environment:
+      DATA_SOURCE_NAME: "lunar:lunar@(mysql:3306)/"
+    depends_on:
+      - db
+
   redis:
     image: redis:7
     container_name: my_redis
@@ -28,6 +39,17 @@ services:
     networks:
       v2ex-net:
         ipv4_address: 172.20.0.11
+
+  redis_exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    restart: always
+    ports:
+      - "9121:9121"
+    command:
+      - "--redis.addr=redis://my_redis:6379"
+    depends_on:
+      - redis
 
   consul:
     image: consul:1.15
@@ -84,6 +106,30 @@ services:
       v2ex-net:
         ipv4_address: 172.20.0.14
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.30
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      v2ex-net:
+        ipv4_address: 172.20.0.31
+
+  # local micro services
   home:
     build: 
       context: .
@@ -102,6 +148,7 @@ services:
       - consul
     environment:
       BINDADDR: "172.20.0.20:8080"
+    restart: always
 
   post:
     build: 
@@ -119,6 +166,7 @@ services:
       - consul
     environment:
       BINDADDR: "172.20.0.21:8081"
+    restart: always
 
   user:
     build: 
@@ -136,6 +184,7 @@ services:
       - consul
     environment:
       BINDADDR: "172.20.0.22:8082"
+    restart: always
 
   comment:
     build: 
@@ -153,6 +202,7 @@ services:
       - consul
     environment:
       BINDADDR: "172.20.0.23:8083"
+    restart: always
 
   rec:
     build: 
@@ -170,6 +220,7 @@ services:
       - consul
     environment:
       BINDADDR: "172.20.0.24:8084"
+    restart: always
 
 networks:
   v2ex-net:
